@@ -4,10 +4,11 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { apiClient } from 'lib/api'
 
 interface User {
-  id: number
+  id_membre: number
   nom: string
   prenom: string
   email: string
+  fonction: string
   profil_utilisateur: string
 }
 

@@ -26,21 +26,12 @@ export default function NouveauMembrePage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/membres', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (response.ok) {
-        router.push('/membres')
-      } else {
-        console.error('Erreur lors de la création du membre')
-      }
-    } catch (error) {
+      const { createMembre } = await import('utils/membre')
+      await createMembre(formData)
+      router.push('/membres')
+    } catch (error: any) {
       console.error('Erreur:', error)
+      // Gérer l'erreur (afficher un toast, etc.)
     } finally {
       setIsLoading(false)
     }

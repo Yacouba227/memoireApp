@@ -9,11 +9,12 @@ import { Input } from 'components/ui/Input'
 import { Calendar, MapPin, User, Plus, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from "sonner"
+import { createSession, type SessionData } from 'utils/session'
 
 export default function NouvelleSessionPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<SessionData>({
     date_session: '',
     lieu: '',
     president: '',
@@ -27,22 +28,17 @@ export default function NouvelleSessionPage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/sessions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (response.ok) {
+      const session = await createSession(formData)
+      
+      if (session) {
         toast('Session créée avec succès')
         router.push('/sessions')
       } else {
-        console.error('Erreur lors de la création')
+        toast.error('Erreur lors de la création de la session')
       }
     } catch (error) {
       console.error('Erreur:', error)
+      toast.error('Erreur lors de la création de la session')
     } finally {
       setIsLoading(false)
     }

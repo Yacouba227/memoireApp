@@ -1,52 +1,100 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Layout from 'components/layout/Layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'components/ui/Card'
 import { Button } from 'components/ui/Button'
 import { Input } from 'components/ui/Input'
-import { Plus, Search, FileText, Calendar, User, Eye, Download } from 'lucide-react'
+import { Plus, Search, FileText, Calendar, User, Eye, Download, Loader2, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
+import { getAllProcesVerbaux, type ProcesVerbal } from 'utils/procesVerbal'
+import { toast } from 'sonner'
 
 export default function ProcesVerbauxPage() {
   const [searchTerm, setSearchTerm] = useState('')
+  const [procesVerbaux, setProcesVerbaux] = useState<ProcesVerbal[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // Données fictives pour la démonstration
-  const procesVerbaux = [
-    {
-      id: 1,
-      session_date: '2024-01-10',
-      session_lieu: 'Salle de réunion B',
-      session_president: 'Dr. Traoré',
-      auteur_pv: 'Dr. Koné',
-      date_redaction: '2024-01-11',
-      contenu_preview: 'Procès-verbal de la session du conseil du 10 janvier 2024...'
-    },
-    {
-      id: 2,
-      session_date: '2024-01-05',
-      session_lieu: 'Salle de réunion A',
-      session_president: 'Dr. Koné',
-      auteur_pv: 'Dr. Diallo',
-      date_redaction: '2024-01-06',
-      contenu_preview: 'Procès-verbal de la session du conseil du 5 janvier 2024...'
-    },
-    {
-      id: 3,
-      session_date: '2023-12-20',
-      session_lieu: 'Salle de réunion C',
-      session_president: 'Dr. Ouattara',
-      auteur_pv: 'Dr. Traoré',
-      date_redaction: '2023-12-21',
-      contenu_preview: 'Procès-verbal de la session du conseil du 20 décembre 2023...'
+  useEffect(() => {
+    const fetchProcesVerbaux = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+        const procesVerbauxData = await getAllProcesVerbaux()
+        setProcesVerbaux(procesVerbauxData)
+      } catch (error) {
+        console.error('Erreur lors du chargement des procès-verbaux:', error)
+        setError('Erreur lors du chargement des procès-verbaux')
+        toast.error('Erreur lors du chargement des procès-verbaux')
+      } finally {
+        setIsLoading(false)
+      }
     }
-  ]
+
+    fetchProcesVerbaux()
+  }, [])
+
+  // Recharger les données quand on revient sur la page
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchProcesVerbaux()
+    }
+
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
+  }, [])
+
+  const fetchProcesVerbaux = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      const procesVerbauxData = await getAllProcesVerbaux()
+      setProcesVerbaux(procesVerbauxData)
+    } catch (error) {
+      console.error('Erreur lors du chargement des procès-verbaux:', error)
+      setError('Erreur lors du chargement des procès-verbaux')
+      toast.error('Erreur lors du chargement des procès-verbaux')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const filteredProcesVerbaux = procesVerbaux.filter(pv =>
-    pv.session_president.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    pv.session?.president.toLowerCase().includes(searchTerm.toLowerCase()) ||
     pv.auteur_pv.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    pv.session_lieu.toLowerCase().includes(searchTerm.toLowerCase())
+    pv.session?.lieu.toLowerCase().includes(searchTerm.toLowerCase())
   )
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary-600" />
+            <p className="text-gray-600">Chargement des procès-verbaux...</p>
+          </div>
+        </div>
+      </Layout>
+    )
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Erreur de chargement</h3>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()}>
+              Réessayer
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    )
+  }
 
   return (
     <Layout>
@@ -83,7 +131,7 @@ export default function ProcesVerbauxPage() {
         {/* Liste des procès-verbaux */}
         <div className="grid gap-4">
           {filteredProcesVerbaux.map((pv) => (
-            <Card key={pv.id} className="hover:shadow-md transition-shadow">
+            <Card key={pv.id_pv} className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
@@ -94,16 +142,16 @@ export default function ProcesVerbauxPage() {
                       <div className="flex items-center space-x-4">
                         <div>
                           <h3 className="text-lg font-semibold text-gray-900">
-                            Procès-verbal - Session du {new Date(pv.session_date).toLocaleDateString('fr-FR')}
+                            Procès-verbal - Session du {new Date(pv.session?.date_session || '').toLocaleDateString('fr-FR')}
                           </h3>
                           <div className="flex items-center space-x-6 mt-2 text-sm text-gray-600">
                             <div className="flex items-center space-x-1">
                               <Calendar className="w-4 h-4" />
-                              <span>{pv.session_lieu}</span>
+                              <span>{pv.session?.lieu || 'Lieu non spécifié'}</span>
                             </div>
                             <div className="flex items-center space-x-1">
                               <User className="w-4 h-4" />
-                              <span>Président: {pv.session_president}</span>
+                              <span>Président: {pv.session?.president || 'Non spécifié'}</span>
                             </div>
                             <div className="flex items-center space-x-1">
                               <User className="w-4 h-4" />
@@ -111,7 +159,7 @@ export default function ProcesVerbauxPage() {
                             </div>
                           </div>
                           <p className="text-sm text-gray-600 mt-2">
-                            {pv.contenu_preview}
+                            {pv.contenu_pv.substring(0, 150)}...
                           </p>
                         </div>
                       </div>
@@ -123,13 +171,35 @@ export default function ProcesVerbauxPage() {
                       Rédigé le {new Date(pv.date_redaction).toLocaleDateString('fr-FR')}
                     </span>
                     <div className="flex space-x-2">
-                      <Link href={`/proces-verbaux/${pv.id}`}>
+                      <Link href={`/proces-verbaux/${pv.id_pv}`}>
                         <Button variant="outline" size="sm">
                           <Eye className="w-4 h-4 mr-1" />
                           Voir
                         </Button>
                       </Link>
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={async () => {
+                          try {
+                            const response = await fetch(`/api/proces-verbaux/${pv.id_pv}/pdf`)
+                            if (response.ok) {
+                              const blob = await response.blob()
+                              const url = window.URL.createObjectURL(blob)
+                              const a = document.createElement('a')
+                              a.href = url
+                              a.download = `proces-verbal-${pv.id_pv}.pdf`
+                              document.body.appendChild(a)
+                              a.click()
+                              window.URL.revokeObjectURL(url)
+                              document.body.removeChild(a)
+                            }
+                          } catch (error) {
+                            console.error('Erreur lors du téléchargement:', error)
+                            toast.error('Erreur lors du téléchargement')
+                          }
+                        }}
+                      >
                         <Download className="w-4 h-4 mr-1" />
                         Télécharger
                       </Button>

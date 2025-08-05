@@ -1,53 +1,64 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Layout from 'components/layout/Layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'components/ui/Card'
 import { Button } from 'components/ui/Button'
 import { Input } from 'components/ui/Input'
-import { Plus, Search, User, Mail, Briefcase, Edit, Trash2 } from 'lucide-react'
+import { Plus, Search, User, Mail, Briefcase, Edit, Trash2, Eye, Loader2, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
-import { getDocs } from 'utils/doc'
+import { getAllMembres, deleteMembre, type Membre } from 'utils/membre'
+import { toast } from 'sonner'
 
 export default function MembresPage() {
   const [searchTerm, setSearchTerm] = useState('')
+  const [membres, setMembres] = useState<Membre[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // const docs = getDocs()
-  // Données fictives pour la démonstration
-  const membres = [
-    {
-      id: 1,
-      nom: 'Diallo',
-      prenom: 'Amadou',
-      email: 'amadou.diallo@uam.ne',
-      fonction: 'Doyen',
-      profil_utilisateur: 'admin'
-    },
-    {
-      id: 2,
-      nom: 'Traoré',
-      prenom: 'Fatou',
-      email: 'fatou.traore@uam.ne',
-      fonction: 'Vice-doyen',
-      profil_utilisateur: 'membre'
-    },
-    {
-      id: 3,
-      nom: 'Koné',
-      prenom: 'Moussa',
-      email: 'moussa.kone@uam.ne',
-      fonction: 'Secrétaire général',
-      profil_utilisateur: 'membre'
-    },
-    {
-      id: 4,
-      nom: 'Ouattara',
-      prenom: 'Aïcha',
-      email: 'aicha.ouattara@uam.ne',
-      fonction: 'Responsable administratif',
-      profil_utilisateur: 'membre'
+  useEffect(() => {
+    const fetchMembres = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+        const membresData = await getAllMembres()
+        setMembres(membresData)
+      } catch (error) {
+        console.error('Erreur lors du chargement des membres:', error)
+        setError('Erreur lors du chargement des membres')
+        toast.error('Erreur lors du chargement des membres')
+      } finally {
+        setIsLoading(false)
+      }
     }
-  ]
+
+    fetchMembres()
+  }, [])
+
+  // Recharger les données quand on revient sur la page
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchMembres()
+    }
+
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
+  }, [])
+
+  const fetchMembres = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      const membresData = await getAllMembres()
+      setMembres(membresData)
+    } catch (error) {
+      console.error('Erreur lors du chargement des membres:', error)
+      setError('Erreur lors du chargement des membres')
+      toast.error('Erreur lors du chargement des membres')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const getProfilColor = (profil: string) => {
     switch (profil) {
@@ -66,6 +77,36 @@ export default function MembresPage() {
     membre.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     membre.fonction.toLowerCase().includes(searchTerm.toLowerCase())
   )
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary-600" />
+            <p className="text-gray-600">Chargement des membres...</p>
+          </div>
+        </div>
+      </Layout>
+    )
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Erreur de chargement</h3>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()}>
+              Réessayer
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    )
+  }
 
   return (
     <Layout>
@@ -102,7 +143,7 @@ export default function MembresPage() {
         {/* Liste des membres */}
         <div className="grid gap-4">
           {filteredMembres.map((membre) => (
-            <Card key={membre.id} className="hover:shadow-md transition-shadow">
+            <Card key={membre.id_membre} className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
@@ -135,12 +176,36 @@ export default function MembresPage() {
                       {membre.profil_utilisateur}
                     </span>
                     <div className="flex space-x-2">
-                      <Button variant="outline" size="sm">
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button variant="destructive" size="sm">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      <Link href={`/membres/${membre.id_membre}`}>
+                        <Button variant="outline" size="sm">
+                          <Eye className="w-4 h-4 mr-1" />
+                          Voir
+                        </Button>
+                      </Link>
+                                             <Link href={`/membres/${membre.id_membre}/edit`}>
+                         <Button variant="outline" size="sm">
+                           <Edit className="w-4 h-4" />
+                         </Button>
+                       </Link>
+                       <Button 
+                         variant="destructive" 
+                         size="sm"
+                         onClick={async () => {
+                           if (confirm('Êtes-vous sûr de vouloir supprimer ce membre ? Cette action est irréversible.')) {
+                             try {
+                               await deleteMembre(membre.id_membre)
+                               toast.success('Membre supprimé avec succès')
+                               // Recharger la liste
+                               fetchMembres()
+                             } catch (error) {
+                               console.error('Erreur lors de la suppression:', error)
+                               toast.error('Erreur lors de la suppression')
+                             }
+                           }
+                         }}
+                       >
+                         <Trash2 className="w-4 h-4" />
+                       </Button>
                     </div>
                   </div>
                 </div>

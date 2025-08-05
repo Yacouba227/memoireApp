@@ -32,18 +32,18 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { sessionId, contenu_pv, auteur_pv, redacteurId } = await request.json()
+    const { id_session, contenu_pv, auteur_pv, date_redaction } = await request.json()
 
-    if (!sessionId || !contenu_pv || !auteur_pv || !redacteurId) {
+    if (!id_session || !contenu_pv || !auteur_pv) {
       return NextResponse.json(
-        { message: 'Session, contenu, auteur et rédacteur requis' },
+        { message: 'Session, contenu et auteur requis' },
         { status: 400 }
       )
     }
 
     // Vérifier si un procès-verbal existe déjà pour cette session
-    const existingPV = await prisma.procesVerbal.findUnique({
-      where: { sessionId }
+    const existingPV = await prisma.procesVerbal.findFirst({
+      where: { sessionId: id_session }
     })
 
     if (existingPV) {
@@ -57,19 +57,12 @@ export async function POST(request: NextRequest) {
       data: {
         contenu_pv,
         auteur_pv,
-        sessionId,
-        redacteurId
+        sessionId: id_session,
+        redacteurId: 1, // ID par défaut du rédacteur
+        date_redaction: date_redaction ? new Date(date_redaction) : new Date()
       },
       include: {
-        session: true,
-        redacteur: {
-          select: {
-            id_membre: true,
-            nom: true,
-            prenom: true,
-            email: true
-          }
-        }
+        session: true
       }
     })
 
