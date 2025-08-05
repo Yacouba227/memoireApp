@@ -1,0 +1,113 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Membre {
+  id_membre        Int            @id @default(autoincrement())
+  nom              String
+  prenom           String
+  email            String          @unique
+  fonction         String
+  mot_de_passe     String
+  profil_utilisateur String       @default("membre")
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  // Relations
+  participations   Participation[]
+  convocations     Convocation[]
+  procesVerbaux    ProcesVerbal[]
+
+  @@map("membres")
+}
+
+model Session {
+  id_session       Int            @id @default(autoincrement())
+  date_session     DateTime
+  lieu             String
+  president        String
+  statut           String          @default("planifiée") // planifiée, en_cours, terminée
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  // Relations
+  ordresDuJour     OrdreDuJour[]
+  participations   Participation[]
+  convocations     Convocation[]
+  procesVerbal     ProcesVerbal?
+
+  @@map("sessions")
+}
+
+model OrdreDuJour {
+  id_ordre         Int            @id @default(autoincrement())
+  titre_point      String
+  description_point String
+  ordre_affichage  Int            @default(0)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  // Relations
+  sessionId        Int
+  session          Session         @relation(fields: [sessionId], references: [id_session], onDelete: Cascade)
+
+  @@map("ordres_du_jour")
+}
+
+model Participation {
+  id_participation Int            @id @default(autoincrement())
+  present          Boolean        @default(false)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  // Relations
+  membreId         Int
+  membre           Membre         @relation(fields: [membreId], references: [id_membre], onDelete: Cascade)
+  sessionId        Int
+  session          Session         @relation(fields: [sessionId], references: [id_session], onDelete: Cascade)
+
+  @@unique([membreId, sessionId])
+  @@map("participations")
+}
+
+model Convocation {
+  id_convocation   Int            @id @default(autoincrement())
+  date_envoi       DateTime       @default(now())
+  statut           String         @default("envoyée") // envoyée, lue, confirmée
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  // Relations
+  membreId         Int
+  membre           Membre         @relation(fields: [membreId], references: [id_membre], onDelete: Cascade)
+  sessionId        Int
+  session          Session         @relation(fields: [sessionId], references: [id_session], onDelete: Cascade)
+
+  @@unique([membreId, sessionId])
+  @@map("convocations")
+}
+
+model ProcesVerbal {
+  id_pv            Int            @id @default(autoincrement())
+  contenu_pv       String
+  auteur_pv        String
+  date_redaction   DateTime       @default(now())
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  // Relations
+  sessionId        Int            @unique
+  session          Session         @relation(fields: [sessionId], references: [id_session], onDelete: Cascade)
+  redacteurId      Int
+  redacteur        Membre         @relation(fields: [redacteurId], references: [id_membre])
+
+  @@map("proces_verbaux")
+} 
