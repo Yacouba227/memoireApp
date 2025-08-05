@@ -111,3 +111,12 @@ model ProcesVerbal {
 
   @@map("proces_verbaux")
 } 
+
+model doc {
+  id_doc           Int            @id @default(autoincrement())
+  nom_doc          String
+  type_doc         String
+  url_doc          String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+} 
