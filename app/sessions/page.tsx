@@ -1,83 +1,103 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import Layout from 'components/layout/Layout'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'components/ui/Card'
-import { Button } from 'components/ui/Button'
-import { Input } from 'components/ui/Input'
-import { Plus, Search, Calendar, MapPin, User, Clock, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
-import Link from 'next/link'
-import { getAllSessions, type Session } from 'utils/session'
-import { toast } from 'sonner'
+import { useState, useEffect } from "react";
+import Layout from "components/layout/Layout";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "components/ui/Card";
+import { Button } from "components/ui/Button";
+import { Input } from "components/ui/Input";
+import {
+  Plus,
+  Search,
+  Calendar,
+  MapPin,
+  User,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
+import Link from "next/link";
+import { getAllSessions, type Session } from "utils/session";
+import { toast } from "sonner";
 
 export default function SessionsPage() {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [sessions, setSessions] = useState<Session[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSessions = async () => {
       try {
-        setIsLoading(true)
-        setError(null)
-        const sessionsData = await getAllSessions()
-        setSessions(sessionsData)
+        setIsLoading(true);
+        setError(null);
+        const sessionsData = await getAllSessions();
+        setSessions(sessionsData);
       } catch (error) {
-        console.error('Erreur lors du chargement des sessions:', error)
-        setError('Erreur lors du chargement des sessions')
-        toast.error('Erreur lors du chargement des sessions')
+        console.error("Erreur lors du chargement des sessions:", error);
+        setError("Erreur lors du chargement des sessions");
+        toast.error("Erreur lors du chargement des sessions");
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchSessions()
-  }, [])
+    fetchSessions();
+  }, []);
 
   const getStatusIcon = (date: string) => {
-    const sessionDate = new Date(date)
-    const now = new Date()
-    
+    const sessionDate = new Date(date);
+    const now = new Date();
+
     if (sessionDate < now) {
-      return <CheckCircle className="w-4 h-4 text-green-600" />
-    } else if (sessionDate.getTime() - now.getTime() < 24 * 60 * 60 * 1000) { // Dans les 24h
-      return <AlertCircle className="w-4 h-4 text-blue-600" />
+      return <CheckCircle className="w-4 h-4 text-green-600" />;
+    } else if (sessionDate.getTime() - now.getTime() < 24 * 60 * 60 * 1000) {
+      // Dans les 24h
+      return <AlertCircle className="w-4 h-4 text-blue-600" />;
     } else {
-      return <Clock className="w-4 h-4 text-yellow-600" />
+      return <Clock className="w-4 h-4 text-yellow-600" />;
     }
-  }
+  };
 
   const getStatusColor = (date: string) => {
-    const sessionDate = new Date(date)
-    const now = new Date()
-    
+    const sessionDate = new Date(date);
+    const now = new Date();
+
     if (sessionDate < now) {
-      return 'bg-green-100 text-green-800'
-    } else if (sessionDate.getTime() - now.getTime() < 24 * 60 * 60 * 1000) { // Dans les 24h
-      return 'bg-blue-100 text-blue-800'
+      return "bg-green-100 text-green-800";
+    } else if (sessionDate.getTime() - now.getTime() < 24 * 60 * 60 * 1000) {
+      // Dans les 24h
+      return "bg-blue-100 text-blue-800";
     } else {
-      return 'bg-yellow-100 text-yellow-800'
+      return "bg-yellow-100 text-yellow-800";
     }
-  }
+  };
 
   const getStatusText = (date: string) => {
-    const sessionDate = new Date(date)
-    const now = new Date()
-    
-    if (sessionDate < now) {
-      return 'terminée'
-    } else if (sessionDate.getTime() - now.getTime() < 24 * 60 * 60 * 1000) { // Dans les 24h
-      return 'prochaine'
-    } else {
-      return 'planifiée'
-    }
-  }
+    const sessionDate = new Date(date);
+    const now = new Date();
 
-  const filteredSessions = sessions.filter(session =>
-    session.president.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    session.lieu.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+    if (sessionDate < now) {
+      return "terminée";
+    } else if (sessionDate.getTime() - now.getTime() < 24 * 60 * 60 * 1000) {
+      // Dans les 24h
+      return "prochaine";
+    } else {
+      return "planifiée";
+    }
+  };
+
+  const filteredSessions = sessions.filter(
+    (session) =>
+      session.president.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      session.lieu.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (isLoading) {
     return (
@@ -89,7 +109,7 @@ export default function SessionsPage() {
           </div>
         </div>
       </Layout>
-    )
+    );
   }
 
   if (error) {
@@ -98,15 +118,15 @@ export default function SessionsPage() {
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Erreur de chargement</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Erreur de chargement
+            </h3>
             <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()}>
-              Réessayer
-            </Button>
+            <Button onClick={() => window.location.reload()}>Réessayer</Button>
           </div>
         </div>
       </Layout>
-    )
+    );
   }
 
   return (
@@ -144,7 +164,10 @@ export default function SessionsPage() {
         {/* Liste des sessions */}
         <div className="grid gap-4">
           {filteredSessions.map((session) => (
-            <Card key={session.id} className="hover:shadow-md transition-shadow">
+            <Card
+              key={session.id}
+              className="hover:shadow-md transition-shadow"
+            >
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
@@ -153,13 +176,17 @@ export default function SessionsPage() {
                       <div className="flex items-center space-x-4">
                         <div>
                           <h3 className="text-lg font-semibold text-gray-900">
-                            Session du {new Date(session.date_session).toLocaleDateString('fr-FR', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
+                            Session du{" "}
+                            {new Date(session.date_session).toLocaleDateString(
+                              "fr-FR",
+                              {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )}
                           </h3>
                           <div className="flex items-center space-x-6 mt-2 text-sm text-gray-600">
                             <div className="flex items-center space-x-1">
@@ -172,16 +199,22 @@ export default function SessionsPage() {
                             </div>
                             <div className="flex items-center space-x-1">
                               <Calendar className="w-4 h-4" />
-                              <span>{session.ordresDuJour.length} ordres du jour</span>
+                              <span>
+                                {session.ordresDuJour.length} ordres du jour
+                              </span>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-3">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(session.date_session)}`}>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                        session.date_session
+                      )}`}
+                    >
                       {getStatusText(session.date_session)}
                     </span>
                     <Link href={`/sessions/${session.id}`}>
@@ -200,9 +233,13 @@ export default function SessionsPage() {
           <Card>
             <CardContent className="p-8 text-center">
               <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune session trouvée</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Aucune session trouvée
+              </h3>
               <p className="text-gray-600 mb-4">
-                {searchTerm ? 'Aucune session ne correspond à votre recherche.' : 'Aucune session n\'a été créée pour le moment.'}
+                {searchTerm
+                  ? "Aucune session ne correspond à votre recherche."
+                  : "Aucune session n'a été créée pour le moment."}
               </p>
               <Link href="/sessions/nouvelle">
                 <Button>
@@ -215,14 +252,5 @@ export default function SessionsPage() {
         )}
       </div>
     </Layout>
-  )
-} 
-
-
-/* 
-
-Le bouton "voir detail" ne fonctionne pas genre si tu peux le generer
-de créer un bouton supprimé et modifier et les coder pour que ça fonctionne
-
-
-*/
+  );
+}

@@ -12,6 +12,7 @@ interface SessionData {
 }
 
 interface Session {
+  id: any
   id_session: number
   date_session: string
   lieu: string
