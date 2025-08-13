@@ -1,7 +1,6 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { apiClient } from 'lib/api'
 
 interface User {
   id_membre: number
@@ -14,10 +13,9 @@ interface User {
 
 interface AuthContextType {
   user: User | null
-  token: string | null
   login: (email: string, password: string) => Promise<void>
   register: (userData: any) => Promise<void>
-  logout: () => void
+  logout: () => Promise<void>
   loading: boolean
 }
 
@@ -25,73 +23,66 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [token, setToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Vérifier si un token existe dans le localStorage
-    const savedToken = localStorage.getItem('token')
-    if (savedToken) {
-      apiClient.setToken(savedToken)
-      setToken(savedToken)
-      // Vérifier si le token est valide
-      checkAuth()
-    } else {
-      setLoading(false)
+    // Vérifier l'utilisateur courant via le cookie de session
+    const init = async () => {
+      try {
+        const res = await fetch('/api/auth/me', { cache: 'no-store' })
+        if (res.ok) {
+          const data = await res.json()
+          setUser(data.user)
+        } else {
+          setUser(null)
+        }
+      } catch (e) {
+        setUser(null)
+      } finally {
+        setLoading(false)
+      }
     }
+    init()
   }, [])
 
-  const checkAuth = async () => {
-    try {
-      const userData = await apiClient.getMe()
-      setUser(userData)
-    } catch (error) {
-      console.error('Token invalide:', error)
-      logout()
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const login = async (email: string, password: string) => {
-    try {
-      const response = await apiClient.login(email, password)
-      setUser(response.user)
-      setToken(response.token)
-      localStorage.setItem('token', response.token)
-    } catch (error) {
-      console.error('Erreur de connexion:', error)
-      throw error
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.message || 'Email ou mot de passe incorrect')
+    }
+    // Récupérer l'utilisateur courant après connexion
+    const me = await fetch('/api/auth/me', { cache: 'no-store' })
+    if (me.ok) {
+      const data = await me.json()
+      setUser(data.user)
     }
   }
 
   const register = async (userData: any) => {
-    try {
-      const response = await apiClient.register(userData)
-      setUser(response.user)
-      setToken(response.token)
-      localStorage.setItem('token', response.token)
-    } catch (error) {
-      console.error('Erreur d\'inscription:', error)
-      throw error
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData),
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.message || "Erreur d'inscription")
     }
+    // auto login après inscription
+    await login(userData.email, userData.password)
   }
 
-  const logout = () => {
+  const logout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' })
     setUser(null)
-    setToken(null)
-    apiClient.clearToken()
-    localStorage.removeItem('token')
   }
 
-  const value = {
-    user,
-    token,
-    login,
-    register,
-    logout,
-    loading,
-  }
+  const value = { user, login, register, logout, loading }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
@@ -102,4 +93,4 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider')
   }
   return context
-} 
+}

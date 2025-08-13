@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Layout from 'components/layout/Layout'
+import ProtectedRoute from 'components/auth/ProtectedRoute'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'components/ui/Card'
 import { Button } from 'components/ui/Button'
 import { Input } from 'components/ui/Input'
@@ -59,6 +60,7 @@ export default function NouveauProcesVerbalPage() {
   }
 
   return (
+    <ProtectedRoute requireAdmin>
     <Layout>
       <div className="space-y-6">
         {/* Header */}
@@ -189,5 +191,6 @@ export default function NouveauProcesVerbalPage() {
         </form>
       </div>
     </Layout>
+    </ProtectedRoute>
   )
 } 

@@ -23,20 +23,7 @@ export async function POST(request: NextRequest) {
 
     const token = generateToken(user.id_membre, user.email)
 
-    const response = NextResponse.json(
-      { 
-        message: 'Connexion réussie',
-        user: {
-          id: user.id_membre,
-          email: user.email,
-          nom: user.nom,
-          prenom: user.prenom,
-          fonction: user.fonction,
-          profil_utilisateur: user.profil_utilisateur
-        }
-      },
-      { status: 200 }
-    )
+    const response = NextResponse.json({ message: 'Connexion réussie' }, { status: 200 })
 
     // Définir le cookie de session
     response.cookies.set('auth-token', token, {

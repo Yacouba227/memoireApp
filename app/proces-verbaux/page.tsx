@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Layout from 'components/layout/Layout'
+import ProtectedRoute from 'components/auth/ProtectedRoute'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'components/ui/Card'
 import { Button } from 'components/ui/Button'
 import { Input } from 'components/ui/Input'
@@ -9,8 +10,10 @@ import { Plus, Search, FileText, Calendar, User, Eye, Download, Loader2, AlertCi
 import Link from 'next/link'
 import { getAllProcesVerbaux, type ProcesVerbal } from 'utils/procesVerbal'
 import { toast } from 'sonner'
+import { useAuth } from 'contexts/AuthContext'
 
 export default function ProcesVerbauxPage() {
+  const { user } = useAuth()
   const [searchTerm, setSearchTerm] = useState('')
   const [procesVerbaux, setProcesVerbaux] = useState<ProcesVerbal[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -97,6 +100,7 @@ export default function ProcesVerbauxPage() {
   }
 
   return (
+    <ProtectedRoute requireAdmin>
     <Layout>
       <div className="space-y-6">
         {/* En-tête */}
@@ -105,12 +109,14 @@ export default function ProcesVerbauxPage() {
             <h1 className="text-3xl font-bold text-gray-900">Procès-verbaux</h1>
             <p className="text-gray-600">Gestion des procès-verbaux des sessions</p>
           </div>
-          <Link href="/proces-verbaux/nouveau">
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Nouveau procès-verbal
-            </Button>
-          </Link>
+          {user?.profil_utilisateur === 'admin' && (
+            <Link href="/proces-verbaux/nouveau">
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Nouveau procès-verbal
+              </Button>
+            </Link>
+          )}
         </div>
 
         {/* Barre de recherche */}
@@ -230,5 +236,6 @@ export default function ProcesVerbauxPage() {
         )}
       </div>
     </Layout>
+    </ProtectedRoute>
   )
 } 

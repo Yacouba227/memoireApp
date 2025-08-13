@@ -8,8 +8,10 @@ import { Calendar, Users, FileText, Plus, Clock, CheckCircle, AlertCircle, Loade
 import Link from 'next/link'
 import { getDashboardStats, getRecentSessions, type DashboardStats, type RecentSession } from 'utils/dashboard'
 import { toast } from 'sonner'
+import { useAuth } from 'contexts/AuthContext'
 
 export default function DashboardPage() {
+  const { user } = useAuth()
   const [stats, setStats] = useState<DashboardStats>({
     sessionsPlanifiees: 0,
     membresActifs: 0,
@@ -121,10 +123,12 @@ export default function DashboardPage() {
               )}
               Actualiser
             </Button>
-            <Button onClick={() => window.location.href = '/sessions/nouvelle'}>
-              <Plus className="w-4 h-4 mr-2" />
-              Nouvelle session
-            </Button>
+            {user?.profil_utilisateur === 'admin' && (
+              <Button onClick={() => window.location.href = '/sessions/nouvelle'}>
+                <Plus className="w-4 h-4 mr-2" />
+                Nouvelle session
+              </Button>
+            )}
           </div>
         </div>
 
@@ -232,12 +236,14 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <Link href="/sessions/nouvelle">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Créer une nouvelle session
-                  </Button>
-                </Link>
+                {user?.profil_utilisateur === 'admin' && (
+                  <Link href="/sessions/nouvelle">
+                    <Button variant="outline" className="w-full justify-start">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Créer une nouvelle session
+                    </Button>
+                  </Link>
+                )}
                 <Link href="/membres">
                   <Button variant="outline" className="w-full justify-start">
                     <Users className="w-4 h-4 mr-2" />

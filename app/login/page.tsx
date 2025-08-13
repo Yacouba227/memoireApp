@@ -33,7 +33,23 @@ export default function LoginPage() {
     try {
       await login(formData.email, formData.password)
       toast.success('Connexion réussie')
-      router.push('/dashboard')
+      // Redirection selon le rôle
+      try {
+        const meRes = await fetch('/api/auth/me', { cache: 'no-store' })
+        if (meRes.ok) {
+          const data = await meRes.json()
+          const role = data.user?.profil_utilisateur
+          if (role === 'admin') {
+            router.push('/dashboard')
+          } else {
+            router.push('/sessions')
+          }
+        } else {
+          router.push('/sessions')
+        }
+      } catch {
+        router.push('/sessions')
+      }
     } catch (error) {
       console.error('Erreur de connexion:', error)
       toast.error('Email ou mot de passe incorrect')
@@ -128,9 +144,9 @@ export default function LoginPage() {
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600 mb-2">
+              {/* <p className="text-sm text-gray-600 mb-2">
                 Compte de démonstration : admin@fast.uam.ne / admin123
-              </p>
+              </p> */}
               <p className="text-sm text-gray-600">
                 Pas encore de compte ?{' '}
                 <Link href="/register" className="text-blue-600 hover:underline">

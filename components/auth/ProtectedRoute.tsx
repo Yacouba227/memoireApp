@@ -18,7 +18,7 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
       if (!user) {
         router.push('/login')
       } else if (requireAdmin && user.profil_utilisateur !== 'admin') {
-        router.push('/dashboard')
+        router.push('/sessions')
       }
     }
   }, [user, loading, requireAdmin, router])

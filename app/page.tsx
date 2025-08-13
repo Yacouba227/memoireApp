@@ -9,11 +9,7 @@ import { Users, Calendar, FileText } from 'lucide-react'
 export default function HomePage() {
   const router = useRouter()
 
-  useEffect(() => {
-    // Rediriger vers le login si pas connecté
-    // Pour l'instant, on redirige vers le dashboard
-    router.push('/dashboard')
-  }, [router])
+  // Supprimer la redirection automatique pour laisser accéder à /login
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center">

@@ -23,14 +23,17 @@ import {
   Loader2,
 } from "lucide-react";
 import Link from "next/link";
-import { getAllSessions, type Session } from "utils/session";
+import { getAllSessions, type Session, deleteSession } from "utils/session";
 import { toast } from "sonner";
+import { useAuth } from "contexts/AuthContext";
+import { Edit, Trash2 } from "lucide-react";
 
 export default function SessionsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sessions, setSessions] = useState<Session[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchSessions = async () => {
@@ -138,12 +141,14 @@ export default function SessionsPage() {
             <h1 className="text-3xl font-bold text-gray-900">Sessions</h1>
             <p className="text-gray-600">Gestion des sessions du conseil</p>
           </div>
-          <Link href="/sessions/nouvelle">
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Nouvelle session
-            </Button>
-          </Link>
+          {user?.profil_utilisateur === 'admin' && (
+            <Link href="/sessions/nouvelle">
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Nouvelle session
+              </Button>
+            </Link>
+          )}
         </div>
 
         {/* Barre de recherche */}
@@ -165,7 +170,7 @@ export default function SessionsPage() {
         <div className="grid gap-4">
           {filteredSessions.map((session) => (
             <Card
-              key={session.id}
+              key={session.id_session}
               className="hover:shadow-md transition-shadow"
             >
               <CardContent className="p-6">
@@ -217,11 +222,40 @@ export default function SessionsPage() {
                     >
                       {getStatusText(session.date_session)}
                     </span>
-                    <Link href={`/sessions/${session.id}`}>
+                    <Link href={`/sessions/${session.id_session}`}>
                       <Button variant="outline" size="sm">
                         Voir détails
                       </Button>
                     </Link>
+                    {user?.profil_utilisateur === 'admin' && (
+                      <>
+                        <Link href={`/sessions/${session.id_session}/edit`}>
+                          <Button variant="outline" size="sm">
+                            <Edit className="w-4 h-4 mr-1" />
+                            Modifier
+                          </Button>
+                        </Link>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={async () => {
+                            if (confirm('Supprimer cette session ?')) {
+                              try {
+                                await deleteSession(session.id_session)
+                                toast.success('Session supprimée')
+                                setSessions((prev) => prev.filter(s => s.id_session !== session.id_session))
+                              } catch (err: any) {
+                                console.error(err)
+                                toast.error(err.message || 'Suppression impossible')
+                              }
+                            }
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          Supprimer
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </CardContent>

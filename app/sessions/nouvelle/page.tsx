@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Layout from 'components/layout/Layout'
+import ProtectedRoute from 'components/auth/ProtectedRoute'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'components/ui/Card'
 import { Button } from 'components/ui/Button'
 import { Input } from 'components/ui/Input'
@@ -73,7 +74,8 @@ export default function NouvelleSessionPage() {
   }
 
   return (
-    <Layout>
+    <ProtectedRoute requireAdmin>
+      <Layout>
       <div className="space-y-6">
         {/* En-tête */}
         <div className="flex items-center space-x-4">
@@ -215,6 +217,7 @@ export default function NouvelleSessionPage() {
           </div>
         </form>
       </div>
-    </Layout>
+      </Layout>
+    </ProtectedRoute>
   )
 } 
