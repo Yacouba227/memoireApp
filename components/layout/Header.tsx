@@ -4,7 +4,7 @@ import Link from 'next/link'
 import React from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { Button } from 'components/ui/Button'
-import { Users, Calendar, FileText, LogOut, Settings, Menu } from 'lucide-react'
+import { Users, Calendar, FileText, LogOut, Settings, Menu, Mail, List } from 'lucide-react'
 import { useAuth } from 'contexts/AuthContext'
 
 const Header = () => {
@@ -15,8 +15,10 @@ const Header = () => {
 
   type Role = 'admin' | 'membre'
   const allNav: { name: string; href: string; icon: any; roles: Role[] }[] = [
-    { name: 'Tableau de bord', href: '/dashboard', icon: Users, roles: ['admin'] },
+    { name: 'Dashboard', href: '/dashboard', icon: Users, roles: ['admin'] },
     { name: 'Sessions', href: '/sessions', icon: Calendar, roles: ['admin', 'membre'] },
+    { name: 'Ordres du jour', href: '/ordres-du-jour', icon: List, roles: ['admin', 'membre'] },
+    { name: 'Convocations', href: '/convocations', icon: Mail, roles: ['admin'] },
     { name: 'Procès-verbaux', href: '/proces-verbaux', icon: FileText, roles: ['admin'] },
     { name: 'Membres', href: '/membres', icon: Users, roles: ['admin'] },
     { name: 'Paramètres', href: '/parametres', icon: Settings, roles: ['admin'] },

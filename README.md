@@ -1,207 +1,145 @@
 # Plateforme FAST - Gestion des Sessions du Conseil
 
-## 📋 Description
+Une plateforme moderne pour la gestion des sessions du conseil, des ordres du jour, des convocations et des procès-verbaux.
 
-Plateforme web de gestion des sessions du conseil de la Faculté des Sciences et Techniques (FAST) de l'Université Abdou Moumouni (UAM). Cette application permet de numériser l'organisation des réunions du conseil, depuis la planification jusqu'à la rédaction du procès-verbal.
+## Fonctionnalités
 
-## 🎯 Fonctionnalités principales
+### 🔐 Authentification
+- Connexion sécurisée avec JWT
+- Gestion des rôles (admin/membre)
+- Protection des routes
 
-- **Gestion des membres** : Ajout, modification et suppression des membres du conseil avec différents rôles
-- **Planification des sessions** : Création et gestion des réunions avec date, lieu et président
-- **Ordres du jour** : Gestion des points à traiter pour chaque session
-- **Convocations** : Envoi et suivi des convocations aux membres
-- **Procès-verbaux** : Rédaction et consultation des procès-verbaux après chaque réunion
-- **Interface sécurisée** : Authentification et gestion des droits d'accès
+### 📅 Sessions
+- Création et gestion des sessions
+- Planification avec date, lieu et président
+- Statuts (planifiée, en cours, terminée)
 
-## 🛠️ Technologies utilisées
+### 📋 Ordres du jour
+- Gestion des points à traiter
+- Numérotation et ordre d'affichage
+- Durée estimée et responsable par point
+- Interface dédiée pour la consultation
 
-- **Frontend** : Next.js 14, React 18, TypeScript
-- **Styling** : Tailwind CSS
-- **Base de données** : PostgreSQL avec Prisma ORM
-- **Authentification** : JWT avec bcryptjs
-- **Icônes** : Lucide React
-- **Formulaires** : React Hook Form avec Zod validation
+### 📧 Convocations
+- Création de convocations par session
+- Envoi automatique d'emails
+- Suivi des statuts (envoyée, lue, confirmée)
+- Envoi en masse pour une session
 
-## 📁 Structure du projet
+### 📄 Procès-verbaux
+- Rédaction et gestion des PV
+- Génération de PDF
+- Association aux sessions
 
-```
-plateforme-fast/
-├── src/
-│   ├── app/                    # Pages Next.js (App Router)
-│   │   ├── api/               # API Routes
-│   │   ├── dashboard/         # Tableau de bord
-│   │   ├── sessions/          # Gestion des sessions
-│   │   ├── membres/           # Gestion des membres
-│   │   ├── proces-verbaux/    # Gestion des PV
-│   │   └── login/             # Page de connexion
-│   ├── components/            # Composants React
-│   │   ├── ui/               # Composants UI réutilisables
-│   │   └── layout/           # Composants de mise en page
-│   └── lib/                  # Utilitaires et configurations
-├── prisma/                   # Schéma de base de données
-├── public/                   # Assets statiques
-└── package.json
-```
+### 👥 Membres
+- Gestion des membres du conseil
+- Profils utilisateur
+- Informations de contact
 
-## 🚀 Installation et configuration
+## Installation
 
-### Prérequis
-
-- Node.js 18+ 
-- PostgreSQL
-- npm ou yarn
-
-### 1. Cloner le projet
-
+1. Clonez le repository
 ```bash
 git clone <repository-url>
-cd plateforme-fast
+cd memoireCode
 ```
 
-### 2. Installer les dépendances
-
+2. Installez les dépendances
 ```bash
 npm install
 ```
 
-### 3. Configuration de la base de données
+3. Configurez la base de données
+```bash
+npx prisma db push
+npx prisma generate
+```
 
-Créer un fichier `.env.local` à la racine du projet :
+4. Configurez les variables d'environnement
+Créez un fichier `.env` avec les variables suivantes :
 
 ```env
-DATABASE_URL="postgresql://username:password@localhost:5432/plateforme_fast"
+# Configuration de la base de données
+DATABASE_URL="file:./dev.db"
+
+# Configuration JWT
 NEXTAUTH_SECRET="your-secret-key-here"
-NEXTAUTH_URL="http://localhost:3000"
+
+# Configuration SMTP pour l'envoi d'emails
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT="587"
+SMTP_USER="your-email@gmail.com"
+SMTP_PASS="your-app-password"
 ```
 
-### 4. Configuration de la base de données
+### Configuration Email (Gmail)
 
-```bash
-# Générer le client Prisma
-npm run db:generate
+Pour utiliser Gmail comme serveur SMTP :
 
-# Pousser le schéma vers la base de données
-npm run db:push
+1. Activez l'authentification à 2 facteurs sur votre compte Gmail
+2. Allez dans les paramètres de sécurité de votre compte Google
+3. Générez un "mot de passe d'application"
+4. Utilisez ce mot de passe comme `SMTP_PASS`
 
-# (Optionnel) Ouvrir Prisma Studio pour visualiser les données
-npm run db:studio
-```
-
-### 5. Lancer l'application
-
+5. Lancez le serveur de développement
 ```bash
 npm run dev
 ```
 
-L'application sera accessible sur `http://localhost:3000`
+## Structure de la base de données
 
-## 📊 Modèle de données (MCD)
+### Modèles principaux
 
-### Entités principales
+- **MEMBRES** : Gestion des utilisateurs et membres du conseil
+- **SESSIONS** : Sessions du conseil avec informations de planification
+- **ORDRES_JOUR** : Points à traiter lors des sessions
+- **CONVOCATIONS** : Invitations envoyées aux membres
+- **PROCES_VERBAUX** : Comptes-rendus des sessions
+- **PARTICIPATIONS** : Présence des membres aux sessions
+- **DOCUMENTS** : Fichiers associés aux sessions
 
-#### 🔹 Membre
-- `id_membre` (PK)
-- `nom`, `prenom`, `email`, `fonction`
-- `mot_de_passe`, `profil_utilisateur`
-- Relations : participations, convocations, procès-verbaux
+## Utilisation
 
-#### 🔹 Session
-- `id_session` (PK)
-- `date_session`, `lieu`, `president`, `statut`
-- Relations : ordres du jour, participations, convocations, procès-verbal
+### Pour les administrateurs
+1. Créez des sessions avec leurs ordres du jour
+2. Invitez les membres via les convocations
+3. Gérez les procès-verbaux
+4. Suivez les présences
 
-#### 🔹 Ordre_du_jour
-- `id_ordre` (PK)
-- `titre_point`, `description_point`, `ordre_affichage`
-- Relation : session (1:N)
+### Pour les membres
+1. Consultez les sessions et ordres du jour
+2. Recevez les convocations par email
+3. Accédez aux procès-verbaux
 
-#### 🔹 Convocation
-- `id_convocation` (PK)
-- `date_envoi`, `statut`
-- Relations : membre et session (N:N)
+## Technologies utilisées
 
-#### 🔹 Proces_Verbal
-- `id_pv` (PK)
-- `contenu_pv`, `auteur_pv`, `date_redaction`
-- Relations : session (1:1), rédacteur (N:1)
+- **Frontend** : Next.js 15, React 18, TypeScript
+- **Styling** : Tailwind CSS
+- **Base de données** : SQLite avec Prisma
+- **Authentification** : JWT
+- **Email** : Nodemailer
+- **UI Components** : Lucide React Icons
 
-## 🎨 Interface utilisateur
-
-### Pages principales
-
-1. **Page d'accueil** (`/`) : Présentation de la plateforme
-2. **Connexion** (`/login`) : Authentification des utilisateurs
-3. **Tableau de bord** (`/dashboard`) : Vue d'ensemble avec statistiques
-4. **Sessions** (`/sessions`) : Liste et gestion des sessions
-5. **Membres** (`/membres`) : Gestion des membres du conseil
-6. **Procès-verbaux** (`/proces-verbaux`) : Consultation et rédaction des PV
-
-### Composants UI
-
-- **Button** : Boutons avec différentes variantes
-- **Input** : Champs de saisie avec validation
-- **Card** : Cartes pour organiser le contenu
-- **Layout** : Mise en page cohérente avec header
-
-## 🔐 Sécurité
-
-- **Authentification** : JWT avec cookies httpOnly
-- **Hachage des mots de passe** : bcryptjs
-- **Validation des données** : Zod schemas
-- **Protection CSRF** : Intégrée dans Next.js
-
-## 📱 Responsive Design
-
-L'interface est entièrement responsive et s'adapte aux différentes tailles d'écran :
-- Mobile (< 768px)
-- Tablet (768px - 1024px)
-- Desktop (> 1024px)
-
-## 🚀 Scripts disponibles
+## Scripts disponibles
 
 ```bash
-npm run dev          # Développement
-npm run build        # Production build
-npm run start        # Démarrer en production
-npm run lint         # Vérification du code
-npm run db:generate  # Générer le client Prisma
-npm run db:push      # Pousser le schéma DB
-npm run db:studio    # Interface Prisma Studio
+npm run dev          # Démarre le serveur de développement
+npm run build        # Build pour la production
+npm run start        # Démarre le serveur de production
+npm run lint         # Vérifie le code avec ESLint
+npm run db:generate  # Génère le client Prisma
+npm run db:push      # Synchronise la base de données
+npm run db:studio    # Ouvre Prisma Studio
 ```
 
-## 🔧 API Endpoints
-
-### Authentification
-- `POST /api/auth/login` : Connexion utilisateur
-
-### Sessions
-- `GET /api/sessions` : Liste des sessions
-- `POST /api/sessions` : Créer une session
-
-### Membres
-- `GET /api/membres` : Liste des membres
-- `POST /api/membres` : Créer un membre
-
-### Procès-verbaux
-- `GET /api/proces-verbaux` : Liste des PV
-- `POST /api/proces-verbaux` : Créer un PV
-
-## 📝 Contribution
+## Contribution
 
 1. Fork le projet
-2. Créer une branche feature (`git checkout -b feature/AmazingFeature`)
-3. Commit les changements (`git commit -m 'Add some AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrir une Pull Request
+2. Créez une branche pour votre fonctionnalité
+3. Committez vos changements
+4. Poussez vers la branche
+5. Ouvrez une Pull Request
 
-## 📄 Licence
+## Licence
 
-Ce projet est développé dans le cadre d'un mémoire de fin d'études.
-
-## 👥 Auteur
-
-**Halidou** - Étudiant en informatique à l'Université Abdou Moumouni
-
----
-
-*Plateforme développée pour la Faculté des Sciences et Techniques (FAST) - UAM* 
+Ce projet est sous licence MIT. 

@@ -2,21 +2,32 @@
 interface OrdreDuJour {
   titre_point: string
   description_point: string
+  numero_point?: number
+  duree_estimee?: number
+  responsable?: string
 }
 
 interface SessionData {
+  titre_session?: string
   date_session: string
   lieu: string
   president: string
+  duree_prevue?: number
+  statut_session?: string
+  quorum_requis?: number
   ordresDuJour: OrdreDuJour[]
 }
 
 interface Session {
   id: any
   id_session: number
+  titre_session?: string
   date_session: string
   lieu: string
   president: string
+  duree_prevue?: number
+  statut_session?: string
+  quorum_requis?: number
   createdAt: string
   updatedAt: string
   ordresDuJour?: OrdreDuJour[]
