@@ -64,3 +64,32 @@ export default function HomePage() {
     </div>
   )
 } 
+/* 
+
+Faire un bon UI/UX et d'agrandir les interface.
+
+Refactorisation de l'interface utilisateur
+
+Remplacer la barre de navigation (NavBar) par une barre latérale (SideBar) tout en intégrant le logo.
+Mettre à jour la page de connexion pour qu'elle ne permette qu'à un administrateur d'ajouter ou de supprimer des utilisateurs.
+
+Gestion des rôles et des permissions
+
+Modifier le projet pour différencier les interfaces utilisateur entre les membres et les administrateurs.
+Les membres n'auront pas la permission de modifier ou de créer de nouveaux utilisateurs, sessions, procès-verbaux, etc.
+Seuls les administrateurs auront les droits nécessaires pour effectuer ces actions.
+Et que leur interface se difere
+
+ Révision des pages et fonctionnalités
+
+Revoir la page des paramètres.
+Modifier la page des convocations, en particulier la fonctionnalité liée à Nodemailer.
+
+ Améliorations de l'ergonomie (UX)
+ Implémenter des fenêtres modales pour certaines pages, notamment pour :
+  La gestion des sessions (créer, afficher les détails, etc.), La gestion des ordre du jour (créer, afficher les détails, etc.), La gestion des membres (créer, afficher les détails, etc.)...etc
+ Créer une fenêtre de profil pour permettre aux utilisateurs de consulter et de modifier leurs informations.
+ Développer une fenêtre d'affichage des convocations.
+Ajouter un sélecteur de thème et un bouton de changement de langue.
+
+*/
