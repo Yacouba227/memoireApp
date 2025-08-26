@@ -147,12 +147,7 @@ export default function LoginPage() {
               {/* <p className="text-sm text-gray-600 mb-2">
                 Compte de démonstration : admin@fast.uam.ne / admin123
               </p> */}
-              <p className="text-sm text-gray-600">
-                Pas encore de compte ?{' '}
-                <Link href="/register" className="text-blue-600 hover:underline">
-                  Créer un compte
-                </Link>
-              </p>
+              {/* Suppression de la section "Créer un compte" - seul l'admin peut créer des comptes */}
             </div>
           </CardContent>
         </Card>

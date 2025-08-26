@@ -77,18 +77,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
           <Link href="/dashboard" className="flex items-center space-x-3">
             <img 
               src="/images/logo-fast.gif" 
-              alt="Logo FAST" 
-              className="w-8 h-8 object-contain"
+              alt="Logo" 
+              className="w-12 h-12 object-contain"
             />
-            <span className="text-lg font-bold text-gray-800">FAST</span>
           </Link>
         )}
         {isCollapsed && (
           <Link href="/dashboard" className="flex justify-center">
             <img 
               src="/images/logo-fast.gif" 
-              alt="Logo FAST" 
-              className="w-8 h-8 object-contain"
+              alt="Logo" 
+              className="w-12 h-12 object-contain"
             />
           </Link>
         )}
@@ -127,29 +126,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
 
       {/* Footer avec contrôles et profil */}
       <div className="p-4 border-t border-gray-200 space-y-3">
-        {/* Contrôles de thème et langue */}
-        <div className={`flex ${isCollapsed ? 'flex-col space-y-2' : 'space-x-2'}`}>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleTheme}
-            className="p-2 h-8 w-8"
-            title={theme === 'light' ? 'Passer au mode sombre' : 'Passer au mode clair'}
-          >
-            {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleLanguage}
-            className="p-2 h-8 w-8"
-            title={`Langue: ${language === 'fr' ? 'Français' : 'English'}`}
-          >
-            <Globe className="w-4 h-4" />
-          </Button>
-        </div>
-
         {/* Profil utilisateur */}
         {user && (
           <div className={`${isCollapsed ? 'text-center' : ''}`}>
@@ -180,6 +156,29 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
             </Button>
           </div>
         )}
+
+        {/* Contrôles de thème et langue */}
+        <div className={`flex ${isCollapsed ? 'flex-col space-y-2' : 'space-x-2'}`}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleTheme}
+            className="p-2 h-8 w-8"
+            title={theme === 'light' ? 'Passer au mode sombre' : 'Passer au mode clair'}
+          >
+            {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleLanguage}
+            className="p-2 h-8 w-8"
+            title={`Langue: ${language === 'fr' ? 'Français' : 'English'}`}
+          >
+            <Globe className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
     </div>
   )

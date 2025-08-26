@@ -128,6 +128,22 @@ export default function NouveauMembrePage() {
                   <option value="admin">Administrateur</option>
                 </select>
               </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Rôle académique
+                </label>
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  value={formData.role_membre}
+                  onChange={(e) => setFormData({ ...formData, role_membre: e.target.value })}
+                >
+                  <option value="professeur">Professeur</option>
+                  <option value="docteur">Docteur</option>
+                  <option value="doyen">Doyen</option>
+                  <option value="recteur">Recteur</option>
+                </select>
+              </div>
             </CardContent>
           </Card>
 

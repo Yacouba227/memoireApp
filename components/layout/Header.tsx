@@ -36,8 +36,8 @@ const Header = () => {
             <Link href="/dashboard" className="flex items-center space-x-3">
               <img 
                 src="/images/logo-fast.gif" 
-                alt="Logo FAST" 
-                className="w-10 h-10 object-contain"
+                alt="Logo" 
+                className="w-16 h-16 object-contain"
               />
             </Link>
           </div>
