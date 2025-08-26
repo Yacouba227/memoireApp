@@ -139,7 +139,12 @@ export default function SessionsPage() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Sessions</h1>
-            <p className="text-gray-600">Gestion des sessions du conseil</p>
+            <p className="text-gray-600">
+              {user?.profil_utilisateur === 'admin' 
+                ? 'Gestion des sessions du conseil' 
+                : 'Consultation des sessions du conseil'
+              }
+            </p>
           </div>
           {user?.profil_utilisateur === 'admin' && (
             <Link href="/sessions/nouvelle">
@@ -205,7 +210,7 @@ export default function SessionsPage() {
                             <div className="flex items-center space-x-1">
                               <Calendar className="w-4 h-4" />
                               <span>
-                                {session.ordresDuJour.length} ordres du jour
+                                {session.ordresDuJour?.length || 0} ordres du jour
                               </span>
                             </div>
                           </div>

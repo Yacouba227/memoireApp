@@ -20,6 +20,7 @@ import {
   Menu
 } from 'lucide-react'
 import { useAuth } from 'contexts/AuthContext'
+import { useTheme } from 'contexts/ThemeContext'
 import { Button } from 'components/ui/Button'
 
 interface SidebarProps {
@@ -31,8 +32,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
   const pathname = usePathname()
   const router = useRouter()
   const { user, logout } = useAuth()
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
-  const [language, setLanguage] = useState<'fr' | 'en'>('fr')
+  const { theme, language, toggleTheme, toggleLanguage } = useTheme()
 
   type Role = 'admin' | 'membre'
   
@@ -56,15 +56,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
     router.push('/login')
   }
 
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light')
-    // Ici vous pouvez ajouter la logique pour changer le thème global
-  }
 
-  const toggleLanguage = () => {
-    setLanguage(language === 'fr' ? 'en' : 'fr')
-    // Ici vous pouvez ajouter la logique pour changer la langue
-  }
 
   return (
     <div className={`bg-white border-r border-gray-200 transition-all duration-300 ease-in-out ${
@@ -125,17 +117,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
       </nav>
 
       {/* Footer avec contrôles et profil */}
-      <div className="p-4 border-t border-gray-200 space-y-3">
+      <div className="p-4 border-t border-gray-200 space-y-4">
         {/* Profil utilisateur */}
         {user && (
           <div className={`${isCollapsed ? 'text-center' : ''}`}>
             <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                <User className="w-4 h-4 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-md">
+                <User className="w-5 h-5 text-white" />
               </div>
               {!isCollapsed && (
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
+                  <p className="text-sm font-semibold text-gray-900 truncate">
                     {user.prenom} {user.nom}
                   </p>
                   <p className="text-xs text-gray-500 truncate">
@@ -149,7 +141,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
               variant="ghost"
               size="sm"
               onClick={handleLogout}
-              className={`mt-2 w-full ${isCollapsed ? 'px-2' : 'px-3'}`}
+              className={`mt-3 w-full ${isCollapsed ? 'px-2' : 'px-3'} hover:bg-red-50 hover:text-red-600 transition-colors`}
             >
               <LogOut className="w-4 h-4" />
               {!isCollapsed && <span className="ml-2">Déconnexion</span>}
@@ -158,12 +150,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
         )}
 
         {/* Contrôles de thème et langue */}
-        <div className={`flex ${isCollapsed ? 'flex-col space-y-2' : 'space-x-2'}`}>
+        <div className={`flex ${isCollapsed ? 'flex-col space-y-2' : 'space-x-2'} justify-center`}>
           <Button
             variant="ghost"
             size="sm"
             onClick={toggleTheme}
-            className="p-2 h-8 w-8"
+            className="p-2 h-9 w-9 hover:bg-gray-100 transition-colors"
             title={theme === 'light' ? 'Passer au mode sombre' : 'Passer au mode clair'}
           >
             {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
@@ -173,7 +165,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
             variant="ghost"
             size="sm"
             onClick={toggleLanguage}
-            className="p-2 h-8 w-8"
+            className="p-2 h-9 w-9 hover:bg-gray-100 transition-colors"
             title={`Langue: ${language === 'fr' ? 'Français' : 'English'}`}
           >
             <Globe className="w-4 h-4" />

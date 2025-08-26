@@ -14,11 +14,13 @@ import {
   Plus,
   Edit,
   Trash2,
-  Eye
+  Eye,
+  Lock
 } from 'lucide-react'
 import { useAuth } from 'contexts/AuthContext'
 import Modal from 'components/ui/Modal'
 import ProfileModal from 'components/profile/ProfileModal'
+import PasswordManagerModal from 'components/profile/PasswordManagerModal'
 
 interface User {
   id_membre: number
@@ -35,6 +37,7 @@ export default function ParametresPage() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
   const [isUserModalOpen, setIsUserModalOpen] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
+  const [isPasswordManagerOpen, setIsPasswordManagerOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
@@ -211,6 +214,18 @@ export default function ParametresPage() {
             </CardDescription>
           </CardHeader>
         </Card>
+
+        <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setIsPasswordManagerOpen(true)}>
+          <CardHeader>
+            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+              <Lock className="w-6 h-6 text-red-600" />
+            </div>
+            <CardTitle>Gestion des Mots de Passe</CardTitle>
+            <CardDescription>
+              Réinitialisez les mots de passe des membres en cas d'oubli
+            </CardDescription>
+          </CardHeader>
+        </Card>
       </div>
 
       <Card>
@@ -295,6 +310,11 @@ export default function ParametresPage() {
       <ProfileModal 
         isOpen={isProfileModalOpen} 
         onClose={() => setIsProfileModalOpen(false)} 
+      />
+
+      <PasswordManagerModal
+        isOpen={isPasswordManagerOpen}
+        onClose={() => setIsPasswordManagerOpen(false)}
       />
 
       <Modal
