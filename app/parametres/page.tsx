@@ -1,457 +1,455 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import Layout from 'components/layout/Layout'
+import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'components/ui/Card'
 import { Button } from 'components/ui/Button'
 import { Input } from 'components/ui/Input'
-import { User, Lock, Bell, Database, Download, Upload, LogOut, Save, Loader2 } from 'lucide-react'
+import { 
+  Users, 
+  Settings, 
+  Shield, 
+  Database, 
+  Bell, 
+  Palette,
+  Plus,
+  Edit,
+  Trash2,
+  Eye
+} from 'lucide-react'
 import { useAuth } from 'contexts/AuthContext'
-import { toast } from 'sonner'
+import Modal from 'components/ui/Modal'
+import ProfileModal from 'components/profile/ProfileModal'
+
+interface User {
+  id_membre: number
+  nom: string
+  prenom: string
+  email: string
+  fonction: string
+  profil_utilisateur: string
+}
 
 export default function ParametresPage() {
-  const router = useRouter()
-  const { user, logout } = useAuth()
-  const [isLoading, setIsLoading] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
+  const { user } = useAuth()
+  const [users, setUsers] = useState<User[]>([])
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false)
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
     nom: '',
     prenom: '',
     email: '',
-    fonction: ''
-  })
-  const [passwordData, setPasswordData] = useState({
-    oldPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  })
-  const [notifications, setNotifications] = useState({
-    newSessions: true,
-    convocations: true,
-    procesVerbaux: true,
-    reminders: false
+    fonction: '',
+    profil_utilisateur: 'membre',
+    password: ''
   })
 
   useEffect(() => {
-    if (user) {
-      setFormData({
-        nom: user.nom || '',
-        prenom: user.prenom || '',
-        email: user.email || '',
-        fonction: user.fonction || ''
-      })
+    if (user?.profil_utilisateur === 'admin') {
+      fetchUsers()
     }
   }, [user])
 
-  const handleProfileUpdate = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSaving(true)
-    
+  const fetchUsers = async () => {
     try {
-      const response = await fetch(`/api/membres/${user?.id_membre}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          nom: formData.nom,
-          prenom: formData.prenom,
-          email: formData.email,
-          fonction: formData.fonction
-        }),
-      })
-
+      const response = await fetch('/api/membres')
       if (response.ok) {
-        toast.success('Profil mis à jour avec succès')
-      } else {
-        const error = await response.json()
-        toast.error(error.message || 'Erreur lors de la mise à jour du profil')
+        const data = await response.json()
+        setUsers(data.membres || [])
       }
     } catch (error) {
-      console.error('Erreur lors de la mise à jour du profil:', error)
-      toast.error('Erreur lors de la mise à jour du profil')
-    } finally {
-      setIsSaving(false)
+      console.error('Erreur lors de la récupération des utilisateurs:', error)
     }
   }
 
-  const handlePasswordChange = async (e: React.FormEvent) => {
+  const handleUserAction = (action: 'create' | 'edit' | 'view', userData?: User) => {
+    if (action === 'create') {
+      setFormData({
+        nom: '',
+        prenom: '',
+        email: '',
+        fonction: '',
+        profil_utilisateur: 'membre',
+        password: ''
+      })
+      setIsEditing(false)
+    } else if (action === 'edit' && userData) {
+      setFormData({
+        nom: userData.nom,
+        prenom: userData.prenom,
+        email: userData.email,
+        fonction: userData.fonction,
+        profil_utilisateur: userData.profil_utilisateur,
+        password: ''
+      })
+      setIsEditing(true)
+      setSelectedUser(userData)
+    } else if (action === 'view' && userData) {
+      setSelectedUser(userData)
+      setIsEditing(false)
+    }
+    setIsUserModalOpen(true)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error('Les mots de passe ne correspondent pas')
-      return
-    }
-
-    if (passwordData.newPassword.length < 6) {
-      toast.error('Le mot de passe doit contenir au moins 6 caractères')
-      return
-    }
-
-    setIsSaving(true)
-    
     try {
-      // Simulation de changement de mot de passe
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast.success('Mot de passe changé avec succès')
-      setPasswordData({
-        oldPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      })
+      if (isEditing && selectedUser) {
+        const response = await fetch(`/api/membres/${selectedUser.id_membre}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        })
+        if (response.ok) {
+          fetchUsers()
+          setIsUserModalOpen(false)
+        }
+      } else {
+        const response = await fetch('/api/membres', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        })
+        if (response.ok) {
+          fetchUsers()
+          setIsUserModalOpen(false)
+        }
+      }
     } catch (error) {
-      toast.error('Erreur lors du changement de mot de passe')
-    } finally {
-      setIsSaving(false)
+      console.error('Erreur lors de la sauvegarde:', error)
     }
   }
 
-  const handleNotificationChange = (key: string, value: boolean) => {
-    setNotifications(prev => ({
+  const handleDeleteUser = async (userId: number) => {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+      try {
+        const response = await fetch(`/api/membres/${userId}`, {
+          method: 'DELETE'
+        })
+        if (response.ok) {
+          fetchUsers()
+        }
+      } catch (error) {
+        console.error('Erreur lors de la suppression:', error)
+      }
+    }
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
       ...prev,
-      [key]: value
+      [name]: value
     }))
   }
 
-  const handleLogout = async () => {
-    try {
-      await logout()
-      toast.success('Déconnexion réussie')
-      router.push('/login')
-    } catch (error) {
-      toast.error('Erreur lors de la déconnexion')
-    }
-  }
-
-  const handleExportData = async () => {
-    setIsLoading(true)
-    try {
-      // Simulation d'export
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      toast.success('Données exportées avec succès')
-    } catch (error) {
-      toast.error('Erreur lors de l\'export')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleImportData = async () => {
-    setIsLoading(true)
-    try {
-      // Simulation d'import
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      toast.success('Données importées avec succès')
-    } catch (error) {
-      toast.error('Erreur lors de l\'import')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleBackup = async () => {
-    setIsLoading(true)
-    try {
-      // Simulation de sauvegarde
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('Sauvegarde créée avec succès')
-    } catch (error) {
-      toast.error('Erreur lors de la sauvegarde')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  return (
-    <Layout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Paramètres</h1>
-          <p className="text-gray-600">Configuration de votre compte et de la plateforme</p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Profil utilisateur */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <User className="w-5 h-5" />
-                <span>Profil utilisateur</span>
-              </CardTitle>
-              <CardDescription>
-                Modifiez vos informations personnelles
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <form onSubmit={handleProfileUpdate}>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nom
-                    </label>
-                    <Input
-                      value={formData.nom}
-                      onChange={(e) => setFormData(prev => ({ ...prev, nom: e.target.value }))}
-                      placeholder="Diallo"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Prénom
-                    </label>
-                    <Input
-                      value={formData.prenom}
-                      onChange={(e) => setFormData(prev => ({ ...prev, prenom: e.target.value }))}
-                      placeholder="Amadou"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email
-                  </label>
-                  <Input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    placeholder="votre@email.com"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Fonction
-                  </label>
-                  <Input
-                    value={formData.fonction}
-                    onChange={(e) => setFormData(prev => ({ ...prev, fonction: e.target.value }))}
-                    placeholder="Doyen"
-                  />
-                </div>
-                <Button type="submit" disabled={isSaving} className="w-full">
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Sauvegarde...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4 mr-2" />
-                      Sauvegarder les modifications
-                    </>
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-
-          {/* Sécurité */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Lock className="w-5 h-5" />
-                <span>Sécurité</span>
-              </CardTitle>
-              <CardDescription>
-                Modifiez votre mot de passe
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <form onSubmit={handlePasswordChange}>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Ancien mot de passe
-                  </label>
-                  <Input
-                    type="password"
-                    value={passwordData.oldPassword}
-                    onChange={(e) => setPasswordData(prev => ({ ...prev, oldPassword: e.target.value }))}
-                    placeholder="••••••••"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nouveau mot de passe
-                  </label>
-                  <Input
-                    type="password"
-                    value={passwordData.newPassword}
-                    onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                    placeholder="••••••••"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Confirmer le nouveau mot de passe
-                  </label>
-                  <Input
-                    type="password"
-                    value={passwordData.confirmPassword}
-                    onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                    placeholder="••••••••"
-                  />
-                </div>
-                <Button type="submit" disabled={isSaving} className="w-full">
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Changement...
-                    </>
-                  ) : (
-                    'Changer le mot de passe'
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-
-          {/* Notifications */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Bell className="w-5 h-5" />
-                <span>Notifications</span>
-              </CardTitle>
-              <CardDescription>
-                Configurez vos préférences de notifications
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Nouvelles sessions</span>
-                  <input 
-                    type="checkbox" 
-                    className="rounded" 
-                    checked={notifications.newSessions}
-                    onChange={(e) => handleNotificationChange('newSessions', e.target.checked)}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Convocation reçue</span>
-                  <input 
-                    type="checkbox" 
-                    className="rounded" 
-                    checked={notifications.convocations}
-                    onChange={(e) => handleNotificationChange('convocations', e.target.checked)}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Procès-verbal disponible</span>
-                  <input 
-                    type="checkbox" 
-                    className="rounded" 
-                    checked={notifications.procesVerbaux}
-                    onChange={(e) => handleNotificationChange('procesVerbaux', e.target.checked)}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Rappels de session</span>
-                  <input 
-                    type="checkbox" 
-                    className="rounded" 
-                    checked={notifications.reminders}
-                    onChange={(e) => handleNotificationChange('reminders', e.target.checked)}
-                  />
-                </div>
-              </div>
-              <Button className="w-full">
-                Sauvegarder les préférences
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Base de données */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Database className="w-5 h-5" />
-                <span>Base de données</span>
-              </CardTitle>
-              <CardDescription>
-                Gestion des données et sauvegardes
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={handleExportData}
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Download className="w-4 h-4 mr-2" />
-                  )}
-                  Exporter les données
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={handleImportData}
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Upload className="w-4 h-4 mr-2" />
-                  )}
-                  Importer des données
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={handleBackup}
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Database className="w-4 h-4 mr-2" />
-                  )}
-                  Sauvegarder la base
-                </Button>
-              </div>
-              <div className="pt-4 border-t">
-                <p className="text-sm text-gray-600 mb-2">Statistiques de la base :</p>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div>Membres : <span className="font-medium">3</span></div>
-                  <div>Sessions : <span className="font-medium">2</span></div>
-                  <div>PV : <span className="font-medium">1</span></div>
-                  <div>Taille : <span className="font-medium">2.5 MB</span></div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Actions système */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Actions système</CardTitle>
-            <CardDescription>
-              Actions administratives pour la plateforme
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button variant="outline" className="w-full">
-                Vider le cache
-              </Button>
-              <Button variant="outline" className="w-full">
-                Réinitialiser les données
-              </Button>
-              <Button variant="destructive" className="w-full" onClick={handleLogout}>
-                <LogOut className="w-4 h-4 mr-2" />
-                Déconnexion
-              </Button>
-            </div>
+  if (user?.profil_utilisateur !== 'admin') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6 text-center">
+            <Shield className="w-16 h-16 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              Accès refusé
+            </h2>
+            <p className="text-gray-600">
+              Vous n'avez pas les permissions nécessaires pour accéder à cette page.
+            </p>
           </CardContent>
         </Card>
       </div>
-    </Layout>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Paramètres</h1>
+          <p className="text-gray-600 mt-2">
+            Gérez les paramètres de votre plateforme et vos utilisateurs
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setIsProfileModalOpen(true)}>
+          <CardHeader>
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <Users className="w-6 h-6 text-blue-600" />
+            </div>
+            <CardTitle>Mon Profil</CardTitle>
+            <CardDescription>
+              Consultez et modifiez vos informations personnelles
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleUserAction('create')}>
+          <CardHeader>
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <Plus className="w-6 h-6 text-green-600" />
+            </div>
+            <CardTitle>Nouvel Utilisateur</CardTitle>
+            <CardDescription>
+              Ajoutez un nouveau membre à la plateforme
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setIsSettingsModalOpen(true)}>
+          <CardHeader>
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <Settings className="w-6 h-6 text-purple-600" />
+            </div>
+            <CardTitle>Paramètres Système</CardTitle>
+            <CardDescription>
+              Configurez les paramètres globaux de la plateforme
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Users className="w-5 h-5" />
+            <span>Gestion des Utilisateurs</span>
+          </CardTitle>
+          <CardDescription>
+            Gérez les comptes utilisateurs de la plateforme
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-4 font-medium text-gray-900">Nom</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-900">Email</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-900">Fonction</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-900">Rôle</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-900">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((userItem) => (
+                  <tr key={userItem.id_membre} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-3 px-4">
+                      {userItem.prenom} {userItem.nom}
+                    </td>
+                    <td className="py-3 px-4 text-gray-600">{userItem.email}</td>
+                    <td className="py-3 px-4 text-gray-600">{userItem.fonction}</td>
+                    <td className="py-3 px-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        userItem.profil_utilisateur === 'admin' 
+                          ? 'bg-red-100 text-red-800' 
+                          : 'bg-blue-100 text-blue-800'
+                      }`}>
+                        {userItem.profil_utilisateur === 'admin' ? 'Administrateur' : 'Membre'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleUserAction('view', userItem)}
+                          className="p-1 h-8 w-8"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleUserAction('edit', userItem)}
+                          className="p-1 h-8 w-8"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteUser(userItem.id_membre)}
+                          className="p-1 h-8 w-8 text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      <ProfileModal 
+        isOpen={isProfileModalOpen} 
+        onClose={() => setIsProfileModalOpen(false)} 
+      />
+
+      <Modal
+        isOpen={isUserModalOpen}
+        onClose={() => setIsUserModalOpen(false)}
+        title={isEditing ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur'}
+        size="lg"
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Prénom *
+              </label>
+              <Input
+                name="prenom"
+                value={formData.prenom}
+                onChange={handleInputChange}
+                required
+                className="w-full"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Nom *
+              </label>
+              <Input
+                name="nom"
+                value={formData.nom}
+                onChange={handleInputChange}
+                required
+                className="w-full"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email *
+              </label>
+              <Input
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+                className="w-full"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Fonction *
+              </label>
+              <Input
+                name="fonction"
+                value={formData.fonction}
+                onChange={handleInputChange}
+                required
+                className="w-full"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Rôle *
+              </label>
+              <select
+                name="profil_utilisateur"
+                value={formData.profil_utilisateur}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="membre">Membre</option>
+                <option value="admin">Administrateur</option>
+              </select>
+            </div>
+            
+            {!isEditing && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Mot de passe *
+                </label>
+                <Input
+                  name="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  required={!isEditing}
+                  className="w-full"
+                />
+              </div>
+            )}
+          </div>
+          
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsUserModalOpen(false)}
+            >
+              Annuler
+            </Button>
+            <Button type="submit">
+              {isEditing ? 'Mettre à jour' : 'Créer'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        title="Paramètres Système"
+        size="lg"
+      >
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Configuration Générale</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nom de la plateforme
+                </label>
+                <Input defaultValue="Plateforme FAST" className="w-full" />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  URL de l'application
+                </label>
+                <Input defaultValue="https://fast.uam.ne" className="w-full" />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Fuseau horaire
+                </label>
+                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="Africa/Niamey">Africa/Niamey (UTC+1)</option>
+                  <option value="UTC">UTC</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+            <Button
+              variant="outline"
+              onClick={() => setIsSettingsModalOpen(false)}
+            >
+              Annuler
+            </Button>
+            <Button>
+              Sauvegarder
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    </div>
   )
 } 
