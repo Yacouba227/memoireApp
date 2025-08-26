@@ -68,7 +68,10 @@ const PasswordManagerModal: React.FC<PasswordManagerModalProps> = ({ isOpen, onC
       const response = await fetch('/api/membres')
       if (response.ok) {
         const data = await response.json()
-        setMembres(data.membres || [])
+        // L'API renvoie directement le tableau des membres
+        const list = Array.isArray(data) ? data : (data.membres || [])
+        setMembres(list)
+        setFilteredMembres(list)
       }
     } catch (error) {
       console.error('Erreur lors de la récupération des membres:', error)

@@ -19,6 +19,7 @@ model Membre {
   mot_de_passe     String
   profil_utilisateur String       @default("membre")
   role_membre      String?        // doyen, recteur, professeur, docteur
+  photo_url        String?
   statut           String          @default("actif")
   derniere_connexion DateTime?
   createdAt        DateTime        @default(now())

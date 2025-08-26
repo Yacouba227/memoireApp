@@ -14,14 +14,11 @@ import {
   ChevronLeft, 
   ChevronRight,
   User,
-  Sun,
-  Moon,
-  Globe,
   Menu
 } from 'lucide-react'
 import { useAuth } from 'contexts/AuthContext'
-import { useTheme } from 'contexts/ThemeContext'
 import { Button } from 'components/ui/Button'
+import ProfileModal from 'components/profile/ProfileModal'
 
 interface SidebarProps {
   isCollapsed: boolean
@@ -32,7 +29,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
   const pathname = usePathname()
   const router = useRouter()
   const { user, logout } = useAuth()
-  const { theme, language, toggleTheme, toggleLanguage } = useTheme()
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
 
   type Role = 'admin' | 'membre'
   
@@ -41,7 +38,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
     { name: 'Sessions', href: '/sessions', icon: Calendar, roles: ['admin', 'membre'] },
     { name: 'Ordres du jour', href: '/ordres-du-jour', icon: List, roles: ['admin', 'membre'] },
     { name: 'Convocations', href: '/convocations', icon: Mail, roles: ['admin'] },
-    { name: 'Procès-verbaux', href: '/proces-verbaux', icon: FileText, roles: ['admin'] },
+    { name: 'Procès-verbaux', href: '/proces-verbaux', icon: FileText, roles: ['admin', 'membre'] },
+    { name: 'Mon profil', href: '/mon-profil', icon: User, roles: ['admin', 'membre'] },
     { name: 'Membres', href: '/membres', icon: Users, roles: ['admin'] },
     { name: 'Paramètres', href: '/parametres', icon: Settings, roles: ['admin'] },
   ]
@@ -61,7 +59,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
   return (
     <div className={`bg-white border-r border-gray-200 transition-all duration-300 ease-in-out ${
       isCollapsed ? 'w-16' : 'w-64'
-    } h-screen fixed left-0 top-0 z-50 shadow-lg`}>
+    } h-screen fixed left-0 top-0 z-50 shadow-lg flex flex-col`}>
       
       {/* Header avec logo */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
@@ -94,7 +92,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {navigation.map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href
@@ -122,8 +120,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
         {user && (
           <div className={`${isCollapsed ? 'text-center' : ''}`}>
             <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-md">
-                <User className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
+                <img
+                  src={(user as any).photo_url || '/images/logo-fast.gif'}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                />
               </div>
               {!isCollapsed && (
                 <div className="flex-1 min-w-0">
@@ -146,32 +148,20 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
               <LogOut className="w-4 h-4" />
               {!isCollapsed && <span className="ml-2">Déconnexion</span>}
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsProfileOpen(true)}
+              className={`mt-2 w-full ${isCollapsed ? 'px-2' : 'px-3'}`}
+            >
+              {!isCollapsed ? 'Mon profil' : 'Profil'}
+            </Button>
           </div>
         )}
 
-        {/* Contrôles de thème et langue */}
-        <div className={`flex ${isCollapsed ? 'flex-col space-y-2' : 'space-x-2'} justify-center`}>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleTheme}
-            className="p-2 h-9 w-9 hover:bg-gray-100 transition-colors"
-            title={theme === 'light' ? 'Passer au mode sombre' : 'Passer au mode clair'}
-          >
-            {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleLanguage}
-            className="p-2 h-9 w-9 hover:bg-gray-100 transition-colors"
-            title={`Langue: ${language === 'fr' ? 'Français' : 'English'}`}
-          >
-            <Globe className="w-4 h-4" />
-          </Button>
-        </div>
+        {/* Contrôles déplacés dans le Header */}
       </div>
+      <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
     </div>
   )
 }

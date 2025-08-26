@@ -60,7 +60,8 @@ export default function ParametresPage() {
       const response = await fetch('/api/membres')
       if (response.ok) {
         const data = await response.json()
-        setUsers(data.membres || [])
+        // L'API renvoie directement le tableau des membres
+        setUsers(Array.isArray(data) ? data : (data.membres || []))
       }
     } catch (error) {
       console.error('Erreur lors de la récupération des utilisateurs:', error)
@@ -104,7 +105,15 @@ export default function ParametresPage() {
         const response = await fetch(`/api/membres/${selectedUser.id_membre}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
+          body: JSON.stringify({
+            nom: formData.nom,
+            prenom: formData.prenom,
+            email: formData.email,
+            fonction: formData.fonction,
+            profil_utilisateur: formData.profil_utilisateur,
+            // Utiliser le champ attendu par l'API
+            mot_de_passe: formData.password ? formData.password : undefined
+          })
         })
         if (response.ok) {
           fetchUsers()
@@ -114,7 +123,15 @@ export default function ParametresPage() {
         const response = await fetch('/api/membres', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
+          body: JSON.stringify({
+            nom: formData.nom,
+            prenom: formData.prenom,
+            email: formData.email,
+            fonction: formData.fonction,
+            profil_utilisateur: formData.profil_utilisateur,
+            // Utiliser le champ attendu par l'API
+            mot_de_passe: formData.password
+          })
         })
         if (response.ok) {
           fetchUsers()
@@ -149,23 +166,7 @@ export default function ParametresPage() {
     }))
   }
 
-  if (user?.profil_utilisateur !== 'admin') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-6 text-center">
-            <Shield className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Accès refusé
-            </h2>
-            <p className="text-gray-600">
-              Vous n'avez pas les permissions nécessaires pour accéder à cette page.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
+  // Les membres non-admin voient uniquement leur profil; les admins voient tout
 
   return (
     <div className="space-y-6">
@@ -191,43 +192,48 @@ export default function ParametresPage() {
           </CardHeader>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleUserAction('create')}>
-          <CardHeader>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <Plus className="w-6 h-6 text-green-600" />
-            </div>
-            <CardTitle>Nouvel Utilisateur</CardTitle>
-            <CardDescription>
-              Ajoutez un nouveau membre à la plateforme
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        {user?.profil_utilisateur === 'admin' && (
+          <>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleUserAction('create')}>
+              <CardHeader>
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <Plus className="w-6 h-6 text-green-600" />
+                </div>
+                <CardTitle>Nouvel Utilisateur</CardTitle>
+                <CardDescription>
+                  Ajoutez un nouveau membre à la plateforme
+                </CardDescription>
+              </CardHeader>
+            </Card>
 
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setIsSettingsModalOpen(true)}>
-          <CardHeader>
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Settings className="w-6 h-6 text-purple-600" />
-            </div>
-            <CardTitle>Paramètres Système</CardTitle>
-            <CardDescription>
-              Configurez les paramètres globaux de la plateforme
-            </CardDescription>
-          </CardHeader>
-        </Card>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setIsSettingsModalOpen(true)}>
+              <CardHeader>
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Settings className="w-6 h-6 text-purple-600" />
+                </div>
+                <CardTitle>Paramètres Système</CardTitle>
+                <CardDescription>
+                  Configurez les paramètres globaux de la plateforme
+                </CardDescription>
+              </CardHeader>
+            </Card>
 
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setIsPasswordManagerOpen(true)}>
-          <CardHeader>
-            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-              <Lock className="w-6 h-6 text-red-600" />
-            </div>
-            <CardTitle>Gestion des Mots de Passe</CardTitle>
-            <CardDescription>
-              Réinitialisez les mots de passe des membres en cas d'oubli
-            </CardDescription>
-          </CardHeader>
-        </Card>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setIsPasswordManagerOpen(true)}>
+              <CardHeader>
+                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                  <Lock className="w-6 h-6 text-red-600" />
+                </div>
+                <CardTitle>Gestion des Mots de Passe</CardTitle>
+                <CardDescription>
+                  Réinitialisez les mots de passe des membres en cas d'oubli
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </>
+        )}
       </div>
 
+      {user?.profil_utilisateur === 'admin' && (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
@@ -306,16 +312,19 @@ export default function ParametresPage() {
           </div>
         </CardContent>
       </Card>
+      )}
 
       <ProfileModal 
         isOpen={isProfileModalOpen} 
         onClose={() => setIsProfileModalOpen(false)} 
       />
 
-      <PasswordManagerModal
-        isOpen={isPasswordManagerOpen}
-        onClose={() => setIsPasswordManagerOpen(false)}
-      />
+      {user?.profil_utilisateur === 'admin' && (
+        <PasswordManagerModal
+          isOpen={isPasswordManagerOpen}
+          onClose={() => setIsPasswordManagerOpen(false)}
+        />
+      )}
 
       <Modal
         isOpen={isUserModalOpen}

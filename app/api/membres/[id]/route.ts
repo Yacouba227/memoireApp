@@ -67,7 +67,7 @@ export async function PUT(
       )
     }
 
-    const { nom, prenom, email, fonction, mot_de_passe, profil_utilisateur } = await request.json()
+    const { nom, prenom, email, fonction, mot_de_passe, profil_utilisateur, photo_url } = await request.json()
 
     // Vérifier si le membre existe
     const existingMembre = await prisma.membre.findUnique({
@@ -87,7 +87,8 @@ export async function PUT(
       prenom,
       email,
       fonction,
-      profil_utilisateur
+      profil_utilisateur,
+      photo_url
     }
 
     // Hasher le mot de passe seulement s'il est fourni

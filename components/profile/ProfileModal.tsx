@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { User, Edit, Save, X, Lock, Eye, EyeOff } from 'lucide-react'
+import { User, Edit, Save, X, Lock, Eye, EyeOff, Upload } from 'lucide-react'
 import { useAuth } from 'contexts/AuthContext'
 import { Button } from 'components/ui/Button'
 import { Input } from 'components/ui/Input'
@@ -18,12 +18,14 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [formData, setFormData] = useState({
     nom: '',
     prenom: '',
     email: '',
     fonction: '',
-    mot_de_passe: ''
+    mot_de_passe: '',
+    photo_url: ''
   })
 
   useEffect(() => {
@@ -33,7 +35,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
         prenom: user.prenom || '',
         email: user.email || '',
         fonction: user.fonction || '',
-        mot_de_passe: ''
+        mot_de_passe: '',
+        photo_url: (user as any).photo_url || ''
       })
     }
   }, [user])
@@ -87,10 +90,39 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
         prenom: user.prenom || '',
         email: user.email || '',
         fonction: user.fonction || '',
-        mot_de_passe: ''
+        mot_de_passe: '',
+        photo_url: (user as any).photo_url || ''
       })
     }
     setIsEditing(false)
+  }
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user) return
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      form.append('id_membre', String(user.id_membre))
+      const res = await fetch('/api/auth/profile/photo', { method: 'POST', body: form })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        toast.error(err.error || 'Erreur lors du téléversement')
+        return
+      }
+      const data = await res.json()
+      if (updateUser) {
+        updateUser(data.user)
+      }
+      setFormData(prev => ({ ...prev, photo_url: data.user.photo_url || '' }))
+      toast.success('Photo mise à jour')
+    } catch (err) {
+      toast.error('Erreur lors du téléversement')
+    } finally {
+      setUploading(false)
+    }
   }
 
   if (!user) return null
@@ -121,6 +153,40 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
 
         {/* Formulaire d'édition */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Photo de profil
+            </label>
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
+                <img
+                  src={formData.photo_url || (user as any).photo_url || '/images/logo-fast.gif'}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              {isEditing && (
+                <label className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm cursor-pointer hover:bg-gray-50">
+                  <Upload className="w-4 h-4 mr-2" />
+                  {uploading ? 'Téléversement...' : 'Téléverser'}
+                  <input type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
+                </label>
+              )}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Photo de profil (URL)
+            </label>
+            <Input
+              name="photo_url"
+              value={formData.photo_url}
+              onChange={handleInputChange}
+              disabled={!isEditing}
+              className="w-full"
+              placeholder="https://.../photo.jpg"
+            />
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Prénom
@@ -175,8 +241,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        {/* Mot de passe */}
-        {isEditing && (
+        {/* Mot de passe (réservé admin) */}
+        {isEditing && user.profil_utilisateur === 'admin' && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Nouveau mot de passe (optionnel)

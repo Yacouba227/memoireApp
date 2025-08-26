@@ -35,7 +35,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { nom, prenom, email, fonction, mot_de_passe, profil_utilisateur } = await request.json()
+    const { nom, prenom, email, fonction, mot_de_passe, profil_utilisateur, photo_url } = await request.json()
 
     if (!nom || !prenom || !email || !fonction || !mot_de_passe) {
       return NextResponse.json(
@@ -66,7 +66,8 @@ export async function POST(request: NextRequest) {
         email,
         fonction,
         mot_de_passe: hashedPassword,
-        profil_utilisateur: profil_utilisateur || 'membre'
+        profil_utilisateur: profil_utilisateur || 'membre',
+        photo_url
       }
     })
 

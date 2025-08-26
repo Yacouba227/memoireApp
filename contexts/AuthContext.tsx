@@ -9,6 +9,7 @@ interface User {
   email: string
   fonction: string
   profil_utilisateur: string
+  photo_url?: string | null
 }
 
 interface AuthContextType {
