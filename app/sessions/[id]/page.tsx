@@ -7,9 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from 'components/ui/Card'
 import { Button } from 'components/ui/Button'
 import { Calendar, MapPin, User, ArrowLeft, Edit, Trash2, Loader2, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
-import { getSessionById, deleteSession, type Session } from 'utils/session'
+import { getSessionById, deleteSession, updateSession, type Session } from 'utils/session'
 import { toast } from 'sonner'
 import { useAuth } from 'contexts/AuthContext'
+import SessionModal from 'components/sessions/SessionModal'
 
 export default function SessionDetailPage() {
   const params = useParams()
@@ -18,6 +19,8 @@ export default function SessionDetailPage() {
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [currentSessionToEdit, setCurrentSessionToEdit] = useState<Session | null>(null)
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -97,12 +100,13 @@ export default function SessionDetailPage() {
           </div>
           {user?.profil_utilisateur === 'admin' && (
             <div className="flex space-x-2">
-              <Link href={`/sessions/${session.id_session}/edit`}>
-                <Button variant="outline">
-                  <Edit className="w-4 h-4 mr-2" />
-                  Modifier
-                </Button>
-              </Link>
+              <Button variant="outline" onClick={() => {
+                setCurrentSessionToEdit(session)
+                setIsEditModalOpen(true)
+              }}>
+                <Edit className="w-4 h-4 mr-2" />
+                Modifier
+              </Button>
               <Button variant="destructive" onClick={handleDelete}>
                 <Trash2 className="w-4 h-4 mr-2" />
                 Supprimer
@@ -158,6 +162,39 @@ export default function SessionDetailPage() {
           </Card>
         )}
       </div>
+      {currentSessionToEdit && (
+        <SessionModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          session={currentSessionToEdit}
+          mode="edit"
+          onSave={async (updatedSession) => {
+            try {
+              const sessionDataToUpdate = {
+                titre_session: updatedSession.titre_session,
+                date_session: updatedSession.date_session,
+                lieu: updatedSession.lieu,
+                president: updatedSession.president,
+                statut: updatedSession.statut,
+                duree_prevue: updatedSession.duree_prevue,
+                statut_session: updatedSession.statut_session,
+                quorum_requis: updatedSession.quorum_requis,
+              }
+              await updateSession(updatedSession.id_session!, sessionDataToUpdate)
+              // Refetch session to get the latest data including relations
+              const fetchedSession = await getSessionById(updatedSession.id_session!)
+              if (fetchedSession) {
+                setSession(fetchedSession)
+              }
+              toast.success("Session mise à jour avec succès")
+              setIsEditModalOpen(false)
+            } catch (err: any) {
+              console.error(err)
+              toast.error(err.message || "Erreur lors de la mise à jour de la session")
+            }
+          }}
+        />
+      )}
     </Layout>
   )
 }

@@ -15,22 +15,21 @@ interface SessionData {
   duree_prevue?: number
   statut_session?: string
   quorum_requis?: number
-  ordresDuJour: OrdreDuJour[]
+  ordresDuJour?: OrdreDuJour[] // Rendu facultatif
 }
 
 interface Session {
-  id: any
   id_session: number
   titre_session?: string
   date_session: string
   lieu: string
   president: string
+  statut_session: 'planifiée' | 'en_cours' | 'terminée' | 'annulée' // Mis à jour pour être un type union
   duree_prevue?: number
-  statut_session?: string
   quorum_requis?: number
   createdAt: string
   updatedAt: string
-  ordresDuJour?: OrdreDuJour[]
+  ordresDuJour?: OrdreDuJour[] // Rendu facultatif ici aussi
 }
 
 // Créer une nouvelle session

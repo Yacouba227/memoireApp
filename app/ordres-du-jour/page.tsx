@@ -5,11 +5,11 @@ import Layout from 'components/layout/Layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'components/ui/Card'
 import { Button } from 'components/ui/Button'
 import { Input } from 'components/ui/Input'
-import { 
-  Search, 
-  Calendar, 
-  MapPin, 
-  User, 
+import {
+  Search,
+  Calendar,
+  MapPin,
+  User,
   Clock,
   Loader2,
   Plus,
@@ -18,9 +18,26 @@ import {
   AlertCircle
 } from 'lucide-react'
 import Link from 'next/link'
-import { getAllSessions, type Session } from 'utils/session'
+import { getAllSessions, updateSession, type Session, type OrdreDuJour } from 'utils/session'
 import { toast } from 'sonner'
 import { useAuth } from 'contexts/AuthContext'
+import OrdreDuJourModal from 'components/ordres-du-jour/OrdreDuJourModal'
+
+interface OrdreDuJourItemModal {
+  id?: number
+  titre: string
+  description: string
+  duree_estimee: string
+  type: 'presentation' | 'discussion' | 'vote' | 'information'
+  ordre: number
+}
+
+interface OrdreDuJourModalData {
+  id_ordre?: number
+  date_creation: string
+  session_id?: number
+  items: OrdreDuJourItemModal[]
+}
 
 export default function OrdresDuJourPage() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -28,6 +45,9 @@ export default function OrdresDuJourPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { user } = useAuth()
+
+  const [isOrdreDuJourModalOpen, setIsOrdreDuJourModalOpen] = useState(false)
+  const [currentSessionForOrdreDuJour, setCurrentSessionForOrdreDuJour] = useState<Session | null>(null)
 
   useEffect(() => {
     const fetchSessions = async () => {
@@ -200,12 +220,18 @@ export default function OrdresDuJourPage() {
                     <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                     <p>Aucun ordre du jour défini pour cette session</p>
                     {user?.profil_utilisateur === 'admin' && (
-                      <Link href={`/sessions/${session.id_session}/edit`}>
-                        <Button variant="outline" size="sm" className="mt-2">
-                          <Edit className="w-4 h-4 mr-2" />
-                          Ajouter des points
-                        </Button>
-                      </Link>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2"
+                        onClick={() => {
+                          setCurrentSessionForOrdreDuJour(session)
+                          setIsOrdreDuJourModalOpen(true)
+                        }}
+                      >
+                        <Edit className="w-4 h-4 mr-2" />
+                        Ajouter des points
+                      </Button>
                     )}
                   </div>
                 )}
@@ -238,6 +264,52 @@ export default function OrdresDuJourPage() {
           </Card>
         )}
       </div>
+
+      {currentSessionForOrdreDuJour && (
+        <OrdreDuJourModal
+          isOpen={isOrdreDuJourModalOpen}
+          onClose={() => setIsOrdreDuJourModalOpen(false)}
+          ordreDuJour={{
+            date_creation: currentSessionForOrdreDuJour.createdAt,
+            session_id: currentSessionForOrdreDuJour.id_session,
+            items: currentSessionForOrdreDuJour.ordresDuJour?.map((item, index) => ({
+              id: item.id_ordre,
+              titre: item.titre_point,
+              description: item.description_point,
+              duree_estimee: item.duree_estimee?.toString() || '',
+              type: 'information', // Default type, adjust if you have this info
+              ordre: item.ordre_affichage || index + 1,
+            })) || []
+          }}
+          onSave={async (updatedOrdreDuJour: OrdreDuJourModalData) => {
+            try {
+              const transformedOrdresDuJour: OrdreDuJour[] = updatedOrdreDuJour.items.map((item, index) => ({
+                id_ordre: item.id,
+                titre_point: item.titre,
+                description_point: item.description,
+                ordre_affichage: item.ordre,
+                numero_point: item.ordre,
+                duree_estimee: parseInt(item.duree_estimee) || undefined,
+                responsable: item.responsable || undefined,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                sessionId: currentSessionForOrdreDuJour.id_session,
+              }))
+
+              await updateSession(currentSessionForOrdreDuJour.id_session, { ordresDuJour: transformedOrdresDuJour })
+              toast.success("Ordre du jour mis à jour avec succès")
+              setIsOrdreDuJourModalOpen(false)
+              // Refetch sessions to update the list
+              const sessionsData = await getAllSessions()
+              setSessions(sessionsData)
+            } catch (err: any) {
+              console.error(err)
+              toast.error(err.message || "Erreur lors de la mise à jour de l'ordre du jour")
+            }
+          }}
+          mode="edit"
+        />
+      )}
     </Layout>
   )
 }

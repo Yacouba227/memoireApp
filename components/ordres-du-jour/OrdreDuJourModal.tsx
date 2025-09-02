@@ -106,7 +106,7 @@ const OrdreDuJourModal: React.FC<OrdreDuJourModalProps> = ({
     }
 
     const newItems = [...formData.items]
-    const targetIndex = direction === 'up' ? index - 1 : index + 1
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
     
     [newItems[index], newItems[targetIndex]] = [newItems[targetIndex], newItems[index]]
     

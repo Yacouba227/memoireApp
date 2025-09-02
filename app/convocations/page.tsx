@@ -5,14 +5,14 @@ import Layout from 'components/layout/Layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'components/ui/Card'
 import { Button } from 'components/ui/Button'
 import { Input } from 'components/ui/Input'
-import { 
-  Search, 
-  Mail, 
-  Calendar, 
-  User, 
-  MapPin, 
-  CheckCircle, 
-  Clock, 
+import {
+  Search,
+  Mail,
+  Calendar,
+  User,
+  MapPin,
+  CheckCircle,
+  Clock,
   AlertCircle,
   Loader2,
   Plus,
@@ -22,6 +22,7 @@ import Link from 'next/link'
 import { getAllConvocations, type Convocation, sendConvocationEmail } from 'utils/convocation'
 import { toast } from 'sonner'
 import { useAuth } from 'contexts/AuthContext'
+import ConvocationModal from 'components/convocations/ConvocationModal'
 
 export default function ConvocationsPage() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -30,6 +31,8 @@ export default function ConvocationsPage() {
   const [error, setError] = useState<string | null>(null)
   const [sendingEmails, setSendingEmails] = useState<Set<number>>(new Set())
   const { user } = useAuth()
+  const [isConvocationModalOpen, setIsConvocationModalOpen] = useState(false)
+  const [currentConvocation, setCurrentConvocation] = useState<Convocation | null>(null)
 
   useEffect(() => {
     const fetchConvocations = async () => {
@@ -218,11 +221,16 @@ export default function ConvocationsPage() {
                     >
                       {convocation.statut}
                     </span>
-                    <Link href={`/convocations/${convocation.id_convocation}`}>
-                      <Button variant="outline" size="sm">
-                        Voir détails
-                      </Button>
-                    </Link>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setCurrentConvocation(convocation)
+                        setIsConvocationModalOpen(true)
+                      }}
+                    >
+                      Voir détails
+                    </Button>
                     {user?.profil_utilisateur === 'admin' && (
                       <Button
                         variant="outline"
@@ -269,6 +277,11 @@ export default function ConvocationsPage() {
           </Card>
         )}
       </div>
+      <ConvocationModal
+        isOpen={isConvocationModalOpen}
+        onClose={() => setIsConvocationModalOpen(false)}
+        convocation={currentConvocation}
+      />
     </Layout>
   )
 }

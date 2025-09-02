@@ -23,10 +23,11 @@ import {
   Loader2,
 } from "lucide-react";
 import Link from "next/link";
-import { getAllSessions, type Session, deleteSession } from "utils/session";
+import { getAllSessions, deleteSession, updateSession, type Session, type SessionData } from "utils/session";
 import { toast } from "sonner";
 import { useAuth } from "contexts/AuthContext";
 import { Edit, Trash2 } from "lucide-react";
+import SessionModal from "components/sessions/SessionModal";
 
 export default function SessionsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -34,6 +35,8 @@ export default function SessionsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [currentSessionToEdit, setCurrentSessionToEdit] = useState<Session | null>(null);
 
   useEffect(() => {
     const fetchSessions = async () => {
@@ -234,12 +237,17 @@ export default function SessionsPage() {
                     </Link>
                     {user?.profil_utilisateur === 'admin' && (
                       <>
-                        <Link href={`/sessions/${session.id_session}/edit`}>
-                          <Button variant="outline" size="sm">
-                            <Edit className="w-4 h-4 mr-1" />
-                            Modifier
-                          </Button>
-                        </Link>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setCurrentSessionToEdit(session);
+                            setIsEditModalOpen(true);
+                          }}
+                        >
+                          <Edit className="w-4 h-4 mr-1" />
+                          Modifier
+                        </Button>
                         <Button
                           variant="destructive"
                           size="sm"
@@ -290,6 +298,42 @@ export default function SessionsPage() {
           </Card>
         )}
       </div>
+      <SessionModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        session={currentSessionToEdit}
+        mode="edit"
+        onSave={async (updatedSession) => {
+          try {
+            const sessionDataToUpdate: SessionData = {
+              titre_session: updatedSession.titre_session,
+              date_session: updatedSession.date_session,
+              lieu: updatedSession.lieu,
+              president: updatedSession.president,
+              statut_session: updatedSession.statut_session, // Correction: utiliser statut_session
+              duree_prevue: updatedSession.duree_prevue,
+              quorum_requis: updatedSession.quorum_requis,
+              ordresDuJour: updatedSession.ordresDuJour || [], // S'assurer que ordresDuJour est un tableau
+            };
+            const fetchedSession = await updateSession(updatedSession.id_session!, sessionDataToUpdate);
+            
+            if (fetchedSession) {
+              setSessions((prev) =>
+                prev.map((session) =>
+                  session.id_session === fetchedSession.id_session ? fetchedSession : session
+                )
+              );
+              toast.success("Session modifiée avec succès");
+              setIsEditModalOpen(false);
+            } else {
+              toast.error("Erreur lors de la récupération de la session mise à jour.");
+            }
+          } catch (err: any) {
+            console.error(err);
+            toast.error(err.message || "Erreur lors de la modification de la session");
+          }
+        }}
+      />
     </Layout>
   );
 }

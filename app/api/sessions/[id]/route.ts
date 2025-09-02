@@ -51,21 +51,25 @@ export async function PUT(
     if (!me) return NextResponse.json({ message: 'Non authentifié' }, { status: 401 })
     if (me.profil_utilisateur !== 'admin') return NextResponse.json({ message: 'Interdit' }, { status: 403 })
 
-    const id = parseInt(params.id)
+    const id = parseInt(await params.id)
     if (Number.isNaN(id)) {
       return NextResponse.json({ message: 'ID invalide' }, { status: 400 })
     }
 
     const body = await request.json()
-    const { date_session, lieu, president, ordresDuJour } = body
+    const { titre_session, date_session, lieu, president, statut_session, duree_prevue, quorum_requis, ordresDuJour } = body
 
     const updated = await prisma.session.update({
       where: { id_session: id },
       data: {
+        ...(titre_session ? { titre_session } : {}),
         ...(date_session ? { date_session: new Date(date_session) } : {}),
         ...(lieu ? { lieu } : {}),
         ...(president ? { president } : {}),
-        ...(Array.isArray(ordresDuJour)
+        ...(statut_session ? { statut_session } : {}),
+        ...(duree_prevue !== undefined ? { duree_prevue } : {}),
+        ...(quorum_requis !== undefined ? { quorum_requis } : {}),
+        ...(ordresDuJour !== undefined && Array.isArray(ordresDuJour) // Ajout de la vérification undefined
           ? {
               ordresDuJour: {
                 deleteMany: {},
@@ -97,7 +101,7 @@ export async function DELETE(
     if (!me) return NextResponse.json({ message: 'Non authentifié' }, { status: 401 })
     if (me.profil_utilisateur !== 'admin') return NextResponse.json({ message: 'Interdit' }, { status: 403 })
 
-    const id = parseInt(params.id)
+    const id = parseInt(await params.id)
     if (Number.isNaN(id)) {
       return NextResponse.json({ message: 'ID invalide' }, { status: 400 })
     }
