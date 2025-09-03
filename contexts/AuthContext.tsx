@@ -1,7 +1,10 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { Membre } from 'utils/membre' // Importer le type Membre
 
+// Suppression de l'interface User locale, on utilisera Membre de utils/membre.ts
+/*
 interface User {
   id_membre: number
   nom: string
@@ -11,20 +14,21 @@ interface User {
   profil_utilisateur: string
   photo_url?: string | null
 }
+*/
 
 interface AuthContextType {
-  user: User | null
+  user: Membre | null // Utiliser Membre au lieu de User
   login: (email: string, password: string) => Promise<void>
   register: (userData: any) => Promise<void>
   logout: () => Promise<void>
-  updateUser: (userData: User) => void
+  updateUser: (userData: Membre) => void // Utiliser Membre au lieu de User
   loading: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<Membre | null>(null) // Utiliser Membre au lieu de User
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -84,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }
 
-  const updateUser = (userData: User) => {
+  const updateUser = (userData: Membre) => {
     setUser(userData)
   }
 

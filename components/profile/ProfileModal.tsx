@@ -7,14 +7,18 @@ import { Button } from 'components/ui/Button'
 import { Input } from 'components/ui/Input'
 import Modal from 'components/ui/Modal'
 import { toast } from 'sonner'
+import { Membre, updateMembre } from 'utils/membre' // Importation du type Membre et de updateMembre
 
 interface ProfileModalProps {
   isOpen: boolean
   onClose: () => void
+  user: Membre | null // Ajout de la prop user
+  onSave: (updatedUser: Membre) => void // Ajout de la prop onSave
 }
 
-const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
-  const { user, updateUser } = useAuth()
+const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, user, onSave }) => {
+  const { updateUser } = useAuth()
+
   const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -36,7 +40,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
         email: user.email || '',
         fonction: user.fonction || '',
         mot_de_passe: '',
-        photo_url: (user as any).photo_url || ''
+        photo_url: user.photo_url || ''
       })
     }
   }, [user])
@@ -50,34 +54,38 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
   }
 
   const handleSave = async () => {
-    if (!user) return
+    if (!user || !user.id_membre) return
 
     setIsLoading(true)
     try {
-      const response = await fetch('/api/auth/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id_membre: user.id_membre,
-          ...formData
-        })
-      })
+      const updatedData = {
+        nom: formData.nom,
+        prenom: formData.prenom,
+        email: formData.email,
+        fonction: formData.fonction,
+        // Le mot_de_passe ne doit être envoyé que s'il est modifié
+        ...(formData.mot_de_passe && { mot_de_passe: formData.mot_de_passe }),
+        photo_url: formData.photo_url,
+      }
 
-      if (response.ok) {
-        const data = await response.json()
+      const updatedMembre = await updateMembre(user.id_membre, updatedData)
+
+      if (updatedMembre) {
+        if (onSave) {
+          onSave(updatedMembre) // Appeler la prop onSave avec le membre mis à jour
+        }
         if (updateUser) {
-          updateUser(data.user)
+          updateUser(updatedMembre) // Mettre à jour le contexte AuthContext
         }
         toast.success('Profil mis à jour avec succès')
         setIsEditing(false)
         setFormData(prev => ({ ...prev, mot_de_passe: '' }))
       } else {
-        const error = await response.json()
-        toast.error(error.error || 'Erreur lors de la mise à jour')
+        toast.error('Erreur lors de la mise à jour du profil')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur lors de la sauvegarde:', error)
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(error.message || 'Erreur lors de la sauvegarde')
     } finally {
       setIsLoading(false)
     }
@@ -91,14 +99,14 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
         email: user.email || '',
         fonction: user.fonction || '',
         mot_de_passe: '',
-        photo_url: (user as any).photo_url || ''
+        photo_url: user.photo_url || ''
       })
     }
     setIsEditing(false)
   }
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!user) return
+    if (!user || !user.id_membre) return
     const file = e.target.files?.[0]
     if (!file) return
     setUploading(true)
@@ -106,6 +114,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
       const form = new FormData()
       form.append('file', file)
       form.append('id_membre', String(user.id_membre))
+      // Envoyer la photo de profil via l'API spécifique
       const res = await fetch('/api/auth/profile/photo', { method: 'POST', body: form })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
@@ -113,11 +122,17 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
         return
       }
       const data = await res.json()
-      if (updateUser) {
-        updateUser(data.user)
+      // Après le téléversement réussi, on met à jour les données du membre
+      if (data.user) {
+        if (onSave) {
+          onSave(data.user) // Appeler la prop onSave avec le membre mis à jour
+        }
+        if (updateUser) {
+          updateUser(data.user) // Mettre à jour le contexte AuthContext
+        }
+        setFormData(prev => ({ ...prev, photo_url: data.user.photo_url || '' }))
+        toast.success('Photo mise à jour')
       }
-      setFormData(prev => ({ ...prev, photo_url: data.user.photo_url || '' }))
-      toast.success('Photo mise à jour')
     } catch (err) {
       toast.error('Erreur lors du téléversement')
     } finally {
@@ -160,7 +175,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
                 <img
-                  src={formData.photo_url || (user as any).photo_url || '/images/logo-fast.gif'}
+                  src={formData.photo_url || user.photo_url || '/images/logo-fast.gif'}
                   alt="Avatar"
                   className="w-full h-full object-cover"
                 />

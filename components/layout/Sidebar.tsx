@@ -28,7 +28,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
   const pathname = usePathname()
   const router = useRouter()
-  const { user, logout } = useAuth()
+  const { user, logout, updateUser } = useAuth()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
 
   type Role = 'admin' | 'membre'
@@ -39,7 +39,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
     { name: 'Ordres du jour', href: '/ordres-du-jour', icon: List, roles: ['admin', 'membre'] },
     { name: 'Convocations', href: '/convocations', icon: Mail, roles: ['admin'] },
     { name: 'Procès-verbaux', href: '/proces-verbaux', icon: FileText, roles: ['admin', 'membre'] },
-    { name: 'Mon profil', href: '/mon-profil', icon: User, roles: ['admin', 'membre'] },
     { name: 'Membres', href: '/membres', icon: Users, roles: ['admin'] },
     { name: 'Paramètres', href: '/parametres', icon: Settings, roles: ['admin'] },
   ]
@@ -161,7 +160,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
 
         {/* Contrôles déplacés dans le Header */}
       </div>
-      <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
+      <ProfileModal 
+        isOpen={isProfileOpen} 
+        onClose={() => setIsProfileOpen(false)} 
+        user={user} // Passer la prop user
+        onSave={(updatedUser) => {
+          // Mettre à jour le contexte d'authentification après la sauvegarde
+          if (updateUser) {
+            updateUser(updatedUser)
+          }
+        }}
+      />
     </div>
   )
 }

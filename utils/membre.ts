@@ -11,6 +11,7 @@ interface Membre extends MembreData {
   id_membre: number
   createdAt: string
   updatedAt: string
+  photo_url?: string // Ajout de la propriété photo_url
 }
 
 // Créer un nouveau membre

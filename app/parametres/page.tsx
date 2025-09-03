@@ -21,7 +21,10 @@ import { useAuth } from 'contexts/AuthContext'
 import Modal from 'components/ui/Modal'
 import ProfileModal from 'components/profile/ProfileModal'
 import PasswordManagerModal from 'components/profile/PasswordManagerModal'
+import { Membre } from 'utils/membre' // Importation du type Membre
 
+// Suppression de l'interface User locale, on utilisera Membre de utils/membre.ts
+/*
 interface User {
   id_membre: number
   nom: string
@@ -30,15 +33,16 @@ interface User {
   fonction: string
   profil_utilisateur: string
 }
+*/
 
 export default function ParametresPage() {
-  const { user } = useAuth()
-  const [users, setUsers] = useState<User[]>([])
+  const { user, updateUser } = useAuth()
+  const [users, setUsers] = useState<Membre[]>([]) 
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
   const [isUserModalOpen, setIsUserModalOpen] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [isPasswordManagerOpen, setIsPasswordManagerOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [selectedUser, setSelectedUser] = useState<Membre | null>(null) 
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
     nom: '',
@@ -46,7 +50,8 @@ export default function ParametresPage() {
     email: '',
     fonction: '',
     profil_utilisateur: 'membre',
-    password: ''
+    password: '', 
+    photo_url: '',
   })
 
   useEffect(() => {
@@ -60,7 +65,6 @@ export default function ParametresPage() {
       const response = await fetch('/api/membres')
       if (response.ok) {
         const data = await response.json()
-        // L'API renvoie directement le tableau des membres
         setUsers(Array.isArray(data) ? data : (data.membres || []))
       }
     } catch (error) {
@@ -68,7 +72,7 @@ export default function ParametresPage() {
     }
   }
 
-  const handleUserAction = (action: 'create' | 'edit' | 'view', userData?: User) => {
+  const handleUserAction = (action: 'create' | 'edit' | 'view', userData?: Membre) => {
     if (action === 'create') {
       setFormData({
         nom: '',
@@ -76,7 +80,8 @@ export default function ParametresPage() {
         email: '',
         fonction: '',
         profil_utilisateur: 'membre',
-        password: ''
+        password: '',
+        photo_url: '',
       })
       setIsEditing(false)
     } else if (action === 'edit' && userData) {
@@ -86,7 +91,8 @@ export default function ParametresPage() {
         email: userData.email,
         fonction: userData.fonction,
         profil_utilisateur: userData.profil_utilisateur,
-        password: ''
+        password: '',
+        photo_url: userData.photo_url || '',
       })
       setIsEditing(true)
       setSelectedUser(userData)
@@ -112,7 +118,8 @@ export default function ParametresPage() {
             fonction: formData.fonction,
             profil_utilisateur: formData.profil_utilisateur,
             // Utiliser le champ attendu par l'API
-            mot_de_passe: formData.password ? formData.password : undefined
+            mot_de_passe: formData.password ? formData.password : undefined,
+            photo_url: formData.photo_url,
           })
         })
         if (response.ok) {
@@ -130,7 +137,8 @@ export default function ParametresPage() {
             fonction: formData.fonction,
             profil_utilisateur: formData.profil_utilisateur,
             // Utiliser le champ attendu par l'API
-            mot_de_passe: formData.password
+            mot_de_passe: formData.password,
+            photo_url: formData.photo_url,
           })
         })
         if (response.ok) {
@@ -257,7 +265,7 @@ export default function ParametresPage() {
                 </tr>
               </thead>
               <tbody>
-                {users.map((userItem) => (
+                {users.map((userItem: Membre) => ( // Ajout de l'assertion de type ici
                   <tr key={userItem.id_membre} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-3 px-4">
                       {userItem.prenom} {userItem.nom}
@@ -317,6 +325,13 @@ export default function ParametresPage() {
       <ProfileModal 
         isOpen={isProfileModalOpen} 
         onClose={() => setIsProfileModalOpen(false)} 
+        user={user} // Passer la prop user
+        onSave={(updatedUser) => {
+          // Mettre à jour le contexte d'authentification après la sauvegarde
+          if (updateUser) {
+            updateUser(updatedUser)
+          }
+        }}
       />
 
       {user?.profil_utilisateur === 'admin' && (

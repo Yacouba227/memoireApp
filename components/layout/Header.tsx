@@ -7,7 +7,8 @@ import { Button } from 'components/ui/Button'
 import { Users, Calendar, FileText, LogOut, Settings, Menu, Mail, List, Sun, Moon, User as UserIcon } from 'lucide-react'
 import { useAuth } from 'contexts/AuthContext'
 import { useTheme } from 'contexts/ThemeContext'
-import ProfileModal from 'components/profile/ProfileModal'
+// Supprimer l'importation de ProfileModal
+// import ProfileModal from 'components/profile/ProfileModal'
 
 const Header = () => {
   const pathname = usePathname()
@@ -16,7 +17,8 @@ const Header = () => {
   const { theme, toggleTheme } = useTheme()
   const [mobileOpen, setMobileOpen] = React.useState(false)
 
-  const [isProfileOpen, setIsProfileOpen] = React.useState(false)
+  // Supprimer l'état isProfileOpen
+  // const [isProfileOpen, setIsProfileOpen] = React.useState(false)
   type Role = 'admin' | 'membre'
   const allNav: { name: string; href: string; icon: any; roles: Role[] }[] = [
     { name: 'Dashboard', href: '/dashboard', icon: Users, roles: ['admin'] },
@@ -87,7 +89,8 @@ const Header = () => {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <Button
+                {/* Supprimer le bouton Profil et les informations utilisateur */} 
+                {/* <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsProfileOpen(true)}
@@ -98,7 +101,7 @@ const Header = () => {
                 </Button>
                 <span className="text-sm text-gray-700">
                   {user.prenom} {user.nom}
-                </span>
+                </span> */}
                 <Button 
                   variant="ghost" 
                   size="sm"
@@ -141,7 +144,7 @@ const Header = () => {
             })}
             {user && (
               <button
-                onClick={() => { setIsProfileOpen(true); setMobileOpen(false) }}
+                onClick={() => { /* setIsProfileOpen(true); */ setMobileOpen(false) }}
                 className="w-full flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 <UserIcon className="w-4 h-4" />
@@ -151,7 +154,8 @@ const Header = () => {
           </nav>
         </div>
       )}
-      <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
+      {/* Supprimer le rendu de ProfileModal */}
+      {/* <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} /> */}
     </header>
   )
 }
