@@ -24,6 +24,14 @@ import { toast } from 'sonner'
 import { useAuth } from 'contexts/AuthContext'
 import ConvocationModal from 'components/convocations/ConvocationModal'
 
+// interface Notification {
+//   id: number;
+//   type: string;
+//   message: string;
+//   createdAt: string;
+//   convocationId: number;
+// }
+
 export default function ConvocationsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [convocations, setConvocations] = useState<Convocation[]>([])
@@ -33,25 +41,78 @@ export default function ConvocationsPage() {
   const { user } = useAuth()
   const [isConvocationModalOpen, setIsConvocationModalOpen] = useState(false)
   const [currentConvocation, setCurrentConvocation] = useState<Convocation | null>(null)
+  // const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
+  // const [lastNotificationId, setLastNotificationId] = useState<number | null>(null) // Track the last seen notification
+
+  const fetchConvocations = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      const convocationsData = user?.profil_utilisateur === 'membre' 
+        ? await getAllConvocations(user.id_membre)
+        : await getAllConvocations()
+      setConvocations(convocationsData)
+    } catch (error) {
+      console.error('Erreur lors du chargement des convocations:', error)
+      setError('Erreur lors du chargement des convocations')
+      toast.error('Erreur lors du chargement des convocations')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // const fetchNotifications = async () => {
+  //   if (user?.profil_utilisateur === 'membre') {
+  //     try {
+  //       const response = await fetch('/api/notifications')
+  //       if (response.ok) {
+  //         const newNotifications: Notification[] = await response.json()
+  //         const unread = newNotifications.filter(notif => notif.id > (lastNotificationId || 0))
+
+  //         if (unread.length > 0) {
+  //           // Update lastNotificationId to the highest ID among new notifications
+  //           const maxId = Math.max(...unread.map(notif => notif.id))
+  //           setLastNotificationId(maxId)
+  //           setUnreadNotificationCount(prev => prev + unread.length)
+  //           unread.forEach(notif => {
+  //             toast.info(notif.message, {
+  //               action: {
+  //                 label: 'Voir',
+  //                 onClick: () => {
+  //                   // Find the convocation and open the modal
+  //                   const conv = convocations.find(c => c.id_convocation === notif.convocationId)
+  //                   if (conv) {
+  //                     setCurrentConvocation(conv)
+  //                     setIsConvocationModalOpen(true)
+  //                     setUnreadNotificationCount(prev => Math.max(0, prev - 1)) // Decrease count when notification is viewed
+  //                   }
+  //                 },
+  //               },
+  //             })
+  //           })
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error('Erreur lors du chargement des notifications:', error)
+  //     }
+  //   }
+  // }
 
   useEffect(() => {
-    const fetchConvocations = async () => {
-      try {
-        setIsLoading(true)
-        setError(null)
-        const convocationsData = await getAllConvocations()
-        setConvocations(convocationsData)
-      } catch (error) {
-        console.error('Erreur lors du chargement des convocations:', error)
-        setError('Erreur lors du chargement des convocations')
-        toast.error('Erreur lors du chargement des convocations')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
     fetchConvocations()
-  }, [])
+    // fetchNotifications() // Initial fetch
+
+    // const interval = setInterval(fetchNotifications, 30000) // Poll every 30 seconds
+
+    // return () => clearInterval(interval)
+  }, [user])
+
+  // useEffect(() => {
+  //   // Reset notification count if convo modal is opened and convocation is new
+  //   if (isConvocationModalOpen && currentConvocation?.statut === 'envoyée' && user?.profil_utilisateur === 'membre') {
+  //     setUnreadNotificationCount(prev => Math.max(0, prev - 1))
+  //   }
+  // }, [isConvocationModalOpen, currentConvocation, user])
 
   const getStatusIcon = (statut: string) => {
     switch (statut) {
@@ -82,11 +143,15 @@ export default function ConvocationsPage() {
   const handleSendEmail = async (convocationId: number) => {
     try {
       setSendingEmails(prev => new Set(prev).add(convocationId))
-      await sendConvocationEmail(convocationId)
-      toast.success('Email envoyé avec succès')
-      // Recharger les convocations pour mettre à jour les statuts
-      const updatedConvocations = await getAllConvocations()
-      setConvocations(updatedConvocations)
+      const success = await sendConvocationEmail(convocationId)
+      if (success) {
+        toast.success('Email envoyé avec succès')
+        // Recharger les convocations pour mettre à jour les statuts
+        const updatedConvocations = await getAllConvocations()
+        setConvocations(updatedConvocations)
+      } else {
+        toast.error('Erreur lors de l\'envoi de l\'email.')
+      }
     } catch (error) {
       console.error('Erreur lors de l\'envoi de l\'email:', error)
       toast.error('Erreur lors de l\'envoi de l\'email')
@@ -138,7 +203,7 @@ export default function ConvocationsPage() {
   }
 
   return (
-    <Layout>
+    <Layout /* unreadNotificationCount={unreadNotificationCount} */>
       <div className="space-y-6">
         {/* En-tête */}
         <div className="flex justify-between items-center">
@@ -156,20 +221,22 @@ export default function ConvocationsPage() {
           )}
         </div>
 
-        {/* Barre de recherche */}
-        <Card>
-          <CardContent className="p-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Rechercher par membre, email ou lieu..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        {/* Barre de recherche (visible seulement pour l'admin) */}
+        {user?.profil_utilisateur === 'admin' && (
+          <Card>
+            <CardContent className="p-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Rechercher par membre, email ou lieu..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Liste des convocations */}
         <div className="grid gap-4">
@@ -186,17 +253,23 @@ export default function ConvocationsPage() {
                       <div className="flex items-center space-x-4">
                         <div>
                           <h3 className="text-lg font-semibold text-gray-900">
-                            {convocation.membre?.prenom} {convocation.membre?.nom}
+                            {user?.profil_utilisateur === 'admin'
+                              ? `${convocation.membre?.prenom} ${convocation.membre?.nom}`
+                              : `Convocation à la session du ${new Date(convocation.session?.date_session || '').toLocaleDateString('fr-FR')}`}
                           </h3>
                           <div className="flex items-center space-x-6 mt-2 text-sm text-gray-600">
-                            <div className="flex items-center space-x-1">
-                              <Mail className="w-4 h-4" />
-                              <span>{convocation.membre?.email}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <User className="w-4 h-4" />
-                              <span>{convocation.membre?.fonction}</span>
-                            </div>
+                            {user?.profil_utilisateur === 'admin' && (
+                              <div className="flex items-center space-x-1">
+                                <Mail className="w-4 h-4" />
+                                <span>{convocation.membre?.email}</span>
+                              </div>
+                            )}
+                            {user?.profil_utilisateur === 'admin' && (
+                              <div className="flex items-center space-x-1">
+                                <User className="w-4 h-4" />
+                                <span>{convocation.membre?.fonction}</span>
+                              </div>
+                            )}
                             <div className="flex items-center space-x-1">
                               <Calendar className="w-4 h-4" />
                               <span>
@@ -281,6 +354,14 @@ export default function ConvocationsPage() {
         isOpen={isConvocationModalOpen}
         onClose={() => setIsConvocationModalOpen(false)}
         convocation={currentConvocation}
+        onUpdateConvocation={(updatedConvocation) => {
+          setConvocations(prev => 
+            prev.map(conv => conv.id_convocation === updatedConvocation.id_convocation ? updatedConvocation : conv)
+          )
+          setCurrentConvocation(updatedConvocation)
+          // If a convocation is updated, re-fetch notifications to clear any related unread notifications.
+          // fetchNotifications() 
+        }}
       />
     </Layout>
   )

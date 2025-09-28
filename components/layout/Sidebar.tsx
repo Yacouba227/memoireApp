@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { 
@@ -19,10 +19,22 @@ import {
 import { useAuth } from 'contexts/AuthContext'
 import { Button } from 'components/ui/Button'
 import ProfileModal from 'components/profile/ProfileModal'
+import { toast } from 'sonner'
+import { markConvocationAsRead, type Convocation, getAllConvocations } from 'utils/convocation'
+import ConvocationModal from 'components/convocations/ConvocationModal'
+
+interface Notification {
+  id: number;
+  type: string;
+  message: string;
+  createdAt: string;
+  convocationId: number;
+}
 
 interface SidebarProps {
   isCollapsed: boolean
   onToggle: () => void
+  // unreadNotificationCount?: number // Cette prop sera gérée en interne
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
@@ -30,6 +42,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
   const router = useRouter()
   const { user, logout, updateUser } = useAuth()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
+  const [lastNotificationId, setLastNotificationId] = useState<number | null>(null)
+  const [isConvocationModalOpen, setIsConvocationModalOpen] = useState(false)
+  const [currentConvocation, setCurrentConvocation] = useState<Convocation | null>(null)
 
   type Role = 'admin' | 'membre'
   
@@ -37,7 +53,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
     { name: 'Dashboard', href: '/dashboard', icon: Users, roles: ['admin'] },
     { name: 'Sessions', href: '/sessions', icon: Calendar, roles: ['admin', 'membre'] },
     { name: 'Ordres du jour', href: '/ordres-du-jour', icon: List, roles: ['admin', 'membre'] },
-    { name: 'Convocations', href: '/convocations', icon: Mail, roles: ['admin'] },
+    { name: 'Convocations', href: '/convocations', icon: Mail, roles: ['admin', 'membre'] },
     { name: 'Procès-verbaux', href: '/proces-verbaux', icon: FileText, roles: ['admin', 'membre'] },
     { name: 'Membres', href: '/membres', icon: Users, roles: ['admin'] },
     { name: 'Paramètres', href: '/parametres', icon: Settings, roles: ['admin'] },
@@ -47,6 +63,72 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
     if (!user) return item.name === 'Sessions' || item.name === 'Procès-verbaux'
     return item.roles.includes(user.profil_utilisateur as Role)
   })
+
+  const handleNotificationClick = async (convocationId: number) => {
+    // Fetch the specific convocation to display in the modal
+    try {
+      const allConvocations = await getAllConvocations(user?.id_membre) // Fetch all member convocations
+      const conv = allConvocations.find(c => c.id_convocation === convocationId)
+      if (conv) {
+        setCurrentConvocation(conv)
+        setIsConvocationModalOpen(true)
+
+        // Marquer la convocation comme lue si elle est encore "envoyée"
+        if (conv.statut === 'envoyée') {
+          const updatedConvocation = await markConvocationAsRead(convocationId)
+          if (updatedConvocation) {
+            // Update the convocation list in case we go to convocations page later
+            // For now, just ensuring the state is updated for the modal
+            console.log("Convocation marquée comme lue via notification:", updatedConvocation)
+            // Decrease the unread count as this convocation is now read
+            setUnreadNotificationCount(prev => Math.max(0, prev - 1))
+          } else {
+            toast.error('Erreur lors du marquage de la convocation comme lue.')
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'ouverture de la convocation via notification:', error)
+      toast.error('Erreur lors de l\'ouverture de la convocation.')
+    }
+  }
+
+  const fetchNotifications = async () => {
+    if (user?.profil_utilisateur === 'membre') {
+      try {
+        const response = await fetch('/api/notifications')
+        if (response.ok) {
+          const newNotifications: Notification[] = await response.json()
+          const unread = newNotifications.filter(notif => notif.id > (lastNotificationId || 0))
+
+          if (unread.length > 0) {
+            const maxId = Math.max(...unread.map(notif => notif.id))
+            setLastNotificationId(maxId)
+            setUnreadNotificationCount(prev => prev + unread.length)
+            unread.forEach(notif => {
+              toast.info(notif.message, {
+                action: {
+                  label: 'Voir',
+                  onClick: () => handleNotificationClick(notif.convocationId),
+                },
+              })
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des notifications:', error)
+      }
+    }
+  }
+
+  useEffect(() => {
+    // Fetch notifications immediately when user is available
+    if (user) {
+      fetchNotifications()
+      const interval = setInterval(fetchNotifications, 30000) // Poll every 30 seconds
+      return () => clearInterval(interval)
+    }
+  }, [user]) // Re-run when user changes
 
   const handleLogout = async () => {
     await logout()
@@ -107,7 +189,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
               }`}
             >
               <Icon className={`w-5 h-5 ${isCollapsed ? 'mx-auto' : ''}`} />
-              {!isCollapsed && <span>{item.name}</span>}
+              {!isCollapsed && (
+                <span className="flex items-center justify-between w-full">
+                  {item.name}
+                  {item.name === 'Convocations' && unreadNotificationCount > 0 && (
+                    <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                      {unreadNotificationCount}
+                    </span>
+                  )}
+                </span>
+              )}
             </Link>
           )
         })}
@@ -169,6 +260,20 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
           if (updateUser) {
             updateUser(updatedUser)
           }
+        }}
+      />
+      <ConvocationModal
+        isOpen={isConvocationModalOpen}
+        onClose={() => setIsConvocationModalOpen(false)}
+        convocation={currentConvocation}
+        onUpdateConvocation={(updatedConvocation) => {
+          // If the modal updates a convocation (e.g., confirms attendance),
+          // we need to potentially decrement the unread count if it was a new notification.
+          // For now, simply update currentConvocation.
+          setCurrentConvocation(updatedConvocation)
+          // Since convocations list is in convocations/page.tsx, this update will only apply to the modal
+          // We re-fetch notifications after an update to clear any potential stale unread counts.
+          fetchNotifications() 
         }}
       />
     </div>

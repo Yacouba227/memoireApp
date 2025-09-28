@@ -2,9 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from 'lib/prisma'
 import { verifyToken } from 'lib/auth'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url)
+    const membreId = searchParams.get('membreId')
+
+    const whereClause: { membreId?: number } = {}
+    if (membreId) {
+      whereClause.membreId = parseInt(membreId, 10)
+    }
+
     const convocations = await prisma.convocation.findMany({
+      where: whereClause,
       include: {
         session: true,
         membre: {

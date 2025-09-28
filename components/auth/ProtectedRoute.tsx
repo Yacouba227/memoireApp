@@ -18,7 +18,9 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
       if (!user) {
         router.push('/login')
       } else if (requireAdmin && user.profil_utilisateur !== 'admin') {
-        router.push('/sessions')
+        // If an admin page is required but the user is not an admin,
+        // we let the component render null, as the sidebar already
+        // handles visibility. No redirect is needed here.
       }
     }
   }, [user, loading, requireAdmin, router])

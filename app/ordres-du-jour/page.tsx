@@ -115,10 +115,10 @@ export default function OrdresDuJourPage() {
             <p className="text-gray-600">Gestion des ordres du jour des sessions</p>
           </div>
           {user?.profil_utilisateur === 'admin' && (
-            <Link href="/sessions/nouvelle">
+            <Link href="/ordres-du-jour/nouveau">
               <Button>
                 <Plus className="w-4 h-4 mr-2" />
-                Nouvelle session
+                Nouvel ordre du jour
               </Button>
             </Link>
           )}
@@ -253,10 +253,10 @@ export default function OrdresDuJourPage() {
                   : "Aucune session n'a été créée pour le moment."}
               </p>
               {user?.profil_utilisateur === 'admin' && (
-                <Link href="/sessions/nouvelle">
+                <Link href="/ordres-du-jour/nouveau">
                   <Button>
                     <Plus className="w-4 h-4 mr-2" />
-                    Créer la première session
+                    Créer le premier ordre du jour
                   </Button>
                 </Link>
               )}

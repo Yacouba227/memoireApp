@@ -6,9 +6,10 @@ import Footer from './Footer'
 
 interface LayoutProps {
   children: React.ReactNode
+  unreadNotificationCount?: number
 }
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+const Layout: React.FC<LayoutProps> = ({ children, unreadNotificationCount }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   return (
@@ -16,6 +17,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <Sidebar 
         isCollapsed={sidebarCollapsed} 
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
+        unreadNotificationCount={unreadNotificationCount}
       />
       
       <main className={`transition-all duration-300 ease-in-out ${

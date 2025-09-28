@@ -55,10 +55,11 @@ export async function createConvocation(data: ConvocationData): Promise<Convocat
   }
 }
 
-// Récupérer toutes les convocations
-export async function getAllConvocations(): Promise<Convocation[]> {
+// Récupérer toutes les convocations (optionnellement filtrées par membreId)
+export async function getAllConvocations(membreId?: number): Promise<Convocation[]> {
   try {
-    const response = await fetch('/api/convocations', {
+    const url = membreId ? `/api/convocations?membreId=${membreId}` : '/api/convocations'
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -173,6 +174,31 @@ export async function deleteConvocation(id: number): Promise<boolean> {
   }
 }
 
+// Marquer une convocation comme lue
+export async function markConvocationAsRead(convocationId: number): Promise<Convocation | null> {
+  try {
+    const response = await fetch(`/api/convocations/${convocationId}/read`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      // const error = await response.json()
+      // throw new Error(error.message || 'Erreur lors du marquage de la convocation comme lue')
+      return null
+    }
+
+    const convocation = await response.json()
+    return convocation
+  } catch (error) {
+    console.error('Erreur lors du marquage de la convocation comme lue:', error)
+    // throw error
+    return null
+  }
+}
+
 // Envoyer une convocation par email
 export async function sendConvocationEmail(convocationId: number): Promise<boolean> {
   try {
@@ -184,14 +210,16 @@ export async function sendConvocationEmail(convocationId: number): Promise<boole
     })
 
     if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.message || 'Erreur lors de l\'envoi de l\'email')
+      // const error = await response.json()
+      // throw new Error(error.message || 'Erreur lors de l\'envoi de l\'email')
+      return false
     }
 
     return true
   } catch (error) {
     console.error('Erreur lors de l\'envoi de l\'email:', error)
-    throw error
+    // throw error
+    return false
   }
 }
 

@@ -1,15 +1,19 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import Modal from 'components/ui/Modal'
 import { Button } from 'components/ui/Button'
 import { Calendar, Mail, User, MapPin, Clock, CheckCircle, AlertCircle } from 'lucide-react'
 import type { Convocation } from 'utils/convocation'
+import { useAuth } from 'contexts/AuthContext'
+import { toast } from 'sonner'
+import { updateConvocation, markConvocationAsRead } from 'utils/convocation'
 
 interface ConvocationModalProps {
   isOpen: boolean
   onClose: () => void
   convocation: Convocation | null
+  onUpdateConvocation: (updatedConvocation: Convocation) => void
 }
 
 const getStatusIcon = (statut: string) => {
@@ -28,9 +32,48 @@ const getStatusIcon = (statut: string) => {
 const ConvocationModal: React.FC<ConvocationModalProps> = ({
   isOpen,
   onClose,
-  convocation
+  convocation,
+  onUpdateConvocation
 }) => {
+  const { user } = useAuth()
+
+  useEffect(() => {
+    if (isOpen && user?.profil_utilisateur === 'membre' && convocation?.statut === 'envoyée') {
+      const markAsRead = async () => {
+        try {
+          const updatedConvocation = await markConvocationAsRead(convocation.id_convocation)
+          if (updatedConvocation) {
+            onUpdateConvocation(updatedConvocation)
+          } else {
+            toast.error('Erreur lors du marquage de la convocation comme lue.')
+          }
+        } catch (error) {
+          console.error('Erreur lors du marquage de la convocation comme lue:', error)
+          toast.error('Erreur lors du marquage de la convocation comme lue')
+        }
+      }
+      markAsRead()
+    }
+  }, [isOpen, user, convocation, onUpdateConvocation])
+
   if (!convocation) return null
+
+  const handleConfirmAttendance = async () => {
+    if (!convocation?.id_convocation) return
+    try {
+      const updatedConvocation = await updateConvocation(convocation.id_convocation, { statut: 'confirmée' })
+      if (updatedConvocation) {
+        toast.success('Votre présence a été confirmée !')
+        onUpdateConvocation(updatedConvocation)
+        onClose()
+      } else {
+        toast.error('Erreur lors de la confirmation de présence.')
+      }
+    } catch (error) {
+      console.error('Erreur lors de la confirmation de présence:', error)
+      toast.error('Erreur lors de la confirmation de présence')
+    }
+  }
 
   return (
     <Modal
@@ -40,15 +83,21 @@ const ConvocationModal: React.FC<ConvocationModalProps> = ({
       size="lg"
     >
       <div className="space-y-4 text-gray-700">
-        <p className="text-lg font-semibold">Membre: {convocation.membre?.prenom} {convocation.membre?.nom}</p>
-        <div className="flex items-center space-x-2">
-          <Mail className="w-5 h-5 text-gray-500" />
-          <p>Email: {convocation.membre?.email}</p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <User className="w-5 h-5 text-gray-500" />
-          <p>Fonction: {convocation.membre?.fonction}</p>
-        </div>
+        {user?.profil_utilisateur === 'admin' && (
+          <p className="text-lg font-semibold">Membre: {convocation.membre?.prenom} {convocation.membre?.nom}</p>
+        )}
+        {user?.profil_utilisateur === 'admin' && (
+          <div className="flex items-center space-x-2">
+            <Mail className="w-5 h-5 text-gray-500" />
+            <p>Email: {convocation.membre?.email}</p>
+          </div>
+        )}
+        {user?.profil_utilisateur === 'admin' && (
+          <div className="flex items-center space-x-2">
+            <User className="w-5 h-5 text-gray-500" />
+            <p>Fonction: {convocation.membre?.fonction}</p>
+          </div>
+        )}
         <div className="flex items-center space-x-2">
           <Calendar className="w-5 h-5 text-gray-500" />
           <p>Session: {convocation.session?.titre_session || `Session du ${new Date(convocation.session?.date_session || '').toLocaleDateString('fr-FR')}`}</p>
@@ -80,7 +129,13 @@ const ConvocationModal: React.FC<ConvocationModalProps> = ({
           </div>
         )}
       </div>
-      <div className="mt-6 flex justify-end">
+      <div className="mt-6 flex justify-end space-x-3">
+        {user?.profil_utilisateur === 'membre' && convocation.statut !== 'confirmée' && (
+          <Button onClick={handleConfirmAttendance} variant="success">
+            <CheckCircle className="w-4 h-4 mr-2" />
+            Confirmer ma présence
+          </Button>
+        )}
         <Button onClick={onClose}>Fermer</Button>
       </div>
     </Modal>
