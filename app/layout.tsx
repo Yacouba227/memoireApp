@@ -2,8 +2,9 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from 'contexts/AuthContext'
-import { ThemeProvider } from 'contexts/ThemeContext'
+import { ThemeProvider, useTheme } from 'contexts/ThemeContext'
 import { Toaster } from 'src/components/ui/sonner'
+import ThemeWrapper from 'components/layout/ThemeWrapper'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -22,7 +23,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <AuthProvider>
           <ThemeProvider>
-            {children}
+            <ThemeWrapper>
+              {children}
+            </ThemeWrapper>
           </ThemeProvider>
         </AuthProvider>
         <Toaster />

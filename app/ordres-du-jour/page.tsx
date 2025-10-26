@@ -78,10 +78,10 @@ export default function OrdresDuJourPage() {
   if (isLoading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-[400px] bg-gray-50 dark:bg-gray-900">
           <div className="text-center">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary-600" />
-            <p className="text-gray-600">Chargement des ordres du jour...</p>
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600 dark:text-blue-400" />
+            <p className="text-gray-600 dark:text-gray-300">Chargement des ordres du jour...</p>
           </div>
         </div>
       </Layout>
@@ -91,14 +91,16 @@ export default function OrdresDuJourPage() {
   if (error) {
     return (
       <Layout>
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-[400px] bg-gray-50 dark:bg-gray-900">
           <div className="text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               Erreur de chargement
             </h3>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()}>Réessayer</Button>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()} className="dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-white">
+              Réessayer
+            </Button>
           </div>
         </div>
       </Layout>
@@ -107,16 +109,16 @@ export default function OrdresDuJourPage() {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="space-y-6 p-6 bg-gray-50 dark:bg-gray-800 min-h-[calc(100vh-64px)] rounded-lg shadow-inner">
         {/* En-tête */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Ordres du jour</h1>
-            <p className="text-gray-600">Gestion des ordres du jour des sessions</p>
+            <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-2">Ordres du jour</h1>
+            <p className="text-lg text-gray-700 dark:text-gray-300">Gestion des ordres du jour des sessions</p>
           </div>
           {user?.profil_utilisateur === 'admin' && (
             <Link href="/ordres-du-jour/nouveau">
-              <Button>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-700 dark:hover:bg-blue-800">
                 <Plus className="w-4 h-4 mr-2" />
                 Nouvel ordre du jour
               </Button>
@@ -125,15 +127,15 @@ export default function OrdresDuJourPage() {
         </div>
 
         {/* Barre de recherche */}
-        <Card>
+        <Card className="dark:bg-gray-700 dark:border-gray-600">
           <CardContent className="p-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
               <Input
                 placeholder="Rechercher par président, lieu ou titre..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-gray-100 border-gray-200 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
               />
             </div>
           </CardContent>
@@ -144,31 +146,31 @@ export default function OrdresDuJourPage() {
           {filteredSessions.map((session) => (
             <Card
               key={session.id_session}
-              className="hover:shadow-md transition-shadow"
+              className="hover:shadow-md transform hover:scale-105 duration-200 dark:bg-gray-700 dark:border-gray-600"
             >
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-xl">
+                    <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">
                       {session.titre_session || `Session du ${new Date(session.date_session).toLocaleDateString('fr-FR')}`}
                     </CardTitle>
                     <CardDescription className="mt-2">
-                      <div className="flex items-center space-x-6 text-sm">
+                      <div className="flex items-center space-x-6 text-sm text-gray-600 dark:text-gray-300">
                         <div className="flex items-center space-x-1">
-                          <Calendar className="w-4 h-4" />
+                          <Calendar className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                           <span>{new Date(session.date_session).toLocaleString('fr-FR')}</span>
                         </div>
                         <div className="flex items-center space-x-1">
-                          <MapPin className="w-4 h-4" />
+                          <MapPin className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                           <span>{session.lieu}</span>
                         </div>
                         <div className="flex items-center space-x-1">
-                          <User className="w-4 h-4" />
+                          <User className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                           <span>Président: {session.president}</span>
                         </div>
                         {session.duree_prevue && (
                           <div className="flex items-center space-x-1">
-                            <Clock className="w-4 h-4" />
+                            <Clock className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                             <span>{session.duree_prevue} min</span>
                           </div>
                         )}
@@ -176,7 +178,7 @@ export default function OrdresDuJourPage() {
                     </CardDescription>
                   </div>
                   <Link href={`/sessions/${session.id_session}`}>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" className="dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-white">
                       Voir détails
                     </Button>
                   </Link>
@@ -185,27 +187,27 @@ export default function OrdresDuJourPage() {
               <CardContent>
                 {session.ordresDuJour && session.ordresDuJour.length > 0 ? (
                   <div className="space-y-3">
-                    <h4 className="font-medium text-gray-900">Points à l'ordre du jour :</h4>
+                    <h4 className="font-medium text-gray-900 dark:text-white">Points à l'ordre du jour :</h4>
                     <div className="grid gap-3">
                       {session.ordresDuJour
                         .sort((a, b) => (a.ordre_affichage || 0) - (b.ordre_affichage || 0))
                         .map((ordre, index) => (
-                          <div key={index} className="border border-gray-200 rounded-lg p-4">
+                          <div key={index} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
-                                <h5 className="font-medium text-gray-900">
+                                <h5 className="font-medium text-gray-900 dark:text-white">
                                   Point {ordre.numero_point || index + 1}: {ordre.titre_point}
                                 </h5>
-                                <p className="text-sm text-gray-600 mt-1">
+                                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                                   {ordre.description_point}
                                 </p>
                                 {ordre.responsable && (
-                                  <p className="text-xs text-gray-500 mt-2">
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                                     Responsable: {ordre.responsable}
                                   </p>
                                 )}
                                 {ordre.duree_estimee && (
-                                  <p className="text-xs text-gray-500">
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">
                                     Durée estimée: {ordre.duree_estimee} min
                                   </p>
                                 )}
@@ -216,14 +218,14 @@ export default function OrdresDuJourPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400 border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg">
+                    <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
                     <p>Aucun ordre du jour défini pour cette session</p>
                     {user?.profil_utilisateur === 'admin' && (
                       <Button
                         variant="outline"
                         size="sm"
-                        className="mt-2"
+                        className="mt-2 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-white"
                         onClick={() => {
                           setCurrentSessionForOrdreDuJour(session)
                           setIsOrdreDuJourModalOpen(true)
@@ -241,20 +243,20 @@ export default function OrdresDuJourPage() {
         </div>
 
         {filteredSessions.length === 0 && (
-          <Card>
+          <Card className="dark:bg-gray-700 dark:border-gray-600">
             <CardContent className="p-8 text-center">
-              <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <Calendar className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                 Aucune session trouvée
               </h3>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
                 {searchTerm
                   ? "Aucune session ne correspond à votre recherche."
                   : "Aucune session n'a été créée pour le moment."}
               </p>
               {user?.profil_utilisateur === 'admin' && (
                 <Link href="/ordres-du-jour/nouveau">
-                  <Button>
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-700 dark:hover:bg-blue-800">
                     <Plus className="w-4 h-4 mr-2" />
                     Créer le premier ordre du jour
                   </Button>

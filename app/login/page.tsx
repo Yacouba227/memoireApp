@@ -66,24 +66,24 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-black flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Card className="shadow-xl">
+        <Card className="shadow-xl dark:bg-gray-800 dark:border-gray-700">
           <CardHeader className="text-center">
-            <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-              <User className="w-8 h-8 text-blue-600" />
+            <div className="mx-auto w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-4">
+              <User className="w-8 h-8 text-blue-600 dark:text-blue-200" />
             </div>
-            <CardTitle className="text-2xl font-bold text-gray-900">
+            <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
               Connexion
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-gray-700 dark:text-gray-300">
               Connectez-vous à votre compte pour accéder à la plateforme
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Email
                 </label>
                 <div className="relative">
@@ -93,14 +93,14 @@ export default function LoginPage() {
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     placeholder="votre@email.com"
                     required
-                    className="pl-10"
+                    className="pl-10 bg-gray-100 border-gray-200 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
                   />
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Mot de passe
                 </label>
                 <div className="relative">
@@ -110,13 +110,13 @@ export default function LoginPage() {
                     onChange={(e) => handleInputChange('password', e.target.value)}
                     placeholder="••••••••"
                     required
-                    className="pl-10 pr-10"
+                    className="pl-10 pr-10 bg-gray-100 border-gray-200 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
                   />
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                   >
                     {showPassword ? (
                       <EyeOff className="w-4 h-4" />
@@ -130,7 +130,7 @@ export default function LoginPage() {
               <Button 
                 type="submit" 
                 disabled={isLoading} 
-                className="w-full"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-700 dark:hover:bg-blue-800"
               >
                 {isLoading ? (
                   <>

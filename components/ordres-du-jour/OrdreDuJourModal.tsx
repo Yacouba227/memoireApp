@@ -144,7 +144,7 @@ const OrdreDuJourModal: React.FC<OrdreDuJourModalProps> = ({
         {/* Informations principales */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Titre de l'ordre du jour *
             </label>
             <Input
@@ -153,13 +153,13 @@ const OrdreDuJourModal: React.FC<OrdreDuJourModalProps> = ({
               onChange={handleInputChange}
               required
               disabled={isReadOnly}
-              className="w-full"
+              className="w-full bg-gray-100 border-gray-200 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
               placeholder="Ex: Ordre du jour - Conseil de Faculté du 15 janvier 2024"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Date de création
             </label>
             <Input
@@ -168,18 +168,18 @@ const OrdreDuJourModal: React.FC<OrdreDuJourModalProps> = ({
               value={formData.date_creation}
               onChange={handleInputChange}
               disabled={true}
-              className="w-full bg-gray-100"
+              className="w-full bg-gray-100 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-400"
             />
           </div>
         </div>
 
         {/* Ajout d'un nouvel item */}
         {!isReadOnly && (
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h4 className="text-sm font-medium text-gray-900 mb-3">Ajouter un point à l'ordre du jour</h4>
+          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+            <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Ajouter un point à l'ordre du jour</h4>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Titre *
                 </label>
                 <Input
@@ -187,19 +187,19 @@ const OrdreDuJourModal: React.FC<OrdreDuJourModalProps> = ({
                   value={newItem.titre}
                   onChange={handleItemInputChange}
                   placeholder="Titre du point"
-                  className="w-full text-sm"
+                  className="w-full text-sm bg-gray-100 border-gray-200 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
                 />
               </div>
               
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Type
                 </label>
                 <select
                   name="type"
                   value={newItem.type}
                   onChange={handleItemInputChange}
-                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md"
+                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md bg-gray-100 dark:bg-gray-900 dark:border-gray-600 dark:text-white"
                 >
                   <option value="presentation">Présentation</option>
                   <option value="discussion">Discussion</option>
@@ -209,7 +209,7 @@ const OrdreDuJourModal: React.FC<OrdreDuJourModalProps> = ({
               </div>
               
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Durée estimée
                 </label>
                 <Input
@@ -217,7 +217,7 @@ const OrdreDuJourModal: React.FC<OrdreDuJourModalProps> = ({
                   value={newItem.duree_estimee}
                   onChange={handleItemInputChange}
                   placeholder="Ex: 15 min"
-                  className="w-full text-sm"
+                  className="w-full text-sm bg-gray-100 border-gray-200 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
                 />
               </div>
               
@@ -226,7 +226,7 @@ const OrdreDuJourModal: React.FC<OrdreDuJourModalProps> = ({
                   type="button"
                   onClick={addItem}
                   disabled={!newItem.titre || !newItem.description}
-                  className="w-full text-sm"
+                  className="w-full text-sm bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-700 dark:hover:bg-blue-800"
                 >
                   <Plus className="w-4 h-4" />
                 </Button>
@@ -234,7 +234,7 @@ const OrdreDuJourModal: React.FC<OrdreDuJourModalProps> = ({
             </div>
             
             <div className="mt-3">
-              <label className="block text-xs font-medium text-gray-700 mb-1">
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Description *
               </label>
               <textarea
@@ -243,7 +243,7 @@ const OrdreDuJourModal: React.FC<OrdreDuJourModalProps> = ({
                 onChange={handleItemInputChange}
                 placeholder="Description détaillée du point..."
                 rows={2}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-100 dark:bg-gray-900 dark:border-gray-600 dark:text-white"
               />
             </div>
           </div>
@@ -251,34 +251,34 @@ const OrdreDuJourModal: React.FC<OrdreDuJourModalProps> = ({
 
         {/* Liste des items */}
         <div>
-          <h4 className="text-sm font-medium text-gray-900 mb-3">Points de l'ordre du jour</h4>
+          <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Points de l'ordre du jour</h4>
           <div className="space-y-3">
             {formData.items.map((item, index) => (
-              <div key={index} className="border border-gray-200 rounded-lg p-3 bg-white">
+              <div key={index} className="border border-gray-200 dark:border-gray-600 rounded-lg p-3 bg-white dark:bg-gray-800">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
-                      <span className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">
+                      <span className="w-6 h-6 bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-200 rounded-full flex items-center justify-center text-xs font-medium">
                         {item.ordre}
                       </span>
-                      <h5 className="font-medium text-gray-900">{item.titre}</h5>
+                      <h5 className="font-medium text-gray-900 dark:text-white">{item.titre}</h5>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        item.type === 'presentation' ? 'bg-blue-100 text-blue-800' :
-                        item.type === 'discussion' ? 'bg-green-100 text-green-800' :
-                        item.type === 'vote' ? 'bg-purple-100 text-purple-800' :
-                        'bg-gray-100 text-gray-800'
+                        item.type === 'presentation' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                        item.type === 'discussion' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                        item.type === 'vote' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
+                        'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
                       }`}>
                         {item.type === 'presentation' ? 'Présentation' :
                          item.type === 'discussion' ? 'Discussion' :
                          item.type === 'vote' ? 'Vote' : 'Information'}
                       </span>
                       {item.duree_estimee && (
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
                           {item.duree_estimee}
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-600">{item.description}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{item.description}</p>
                   </div>
                   
                   {!isReadOnly && (
@@ -289,7 +289,7 @@ const OrdreDuJourModal: React.FC<OrdreDuJourModalProps> = ({
                         size="sm"
                         onClick={() => moveItem(index, 'up')}
                         disabled={index === 0}
-                        className="p-1 h-6 w-6"
+                        className="p-1 h-6 w-6 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
                       >
                         ↑
                       </Button>
@@ -299,7 +299,7 @@ const OrdreDuJourModal: React.FC<OrdreDuJourModalProps> = ({
                         size="sm"
                         onClick={() => moveItem(index, 'down')}
                         disabled={index === formData.items.length - 1}
-                        className="p-1 h-6 w-6"
+                        className="p-1 h-6 w-6 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
                       >
                         ↓
                       </Button>
@@ -308,7 +308,7 @@ const OrdreDuJourModal: React.FC<OrdreDuJourModalProps> = ({
                         variant="ghost"
                         size="sm"
                         onClick={() => removeItem(index)}
-                        className="p-1 h-6 w-6 text-red-600 hover:text-red-700"
+                        className="p-1 h-6 w-6 text-red-600 hover:text-red-700 dark:hover:bg-red-900 dark:hover:text-red-300"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -319,8 +319,8 @@ const OrdreDuJourModal: React.FC<OrdreDuJourModalProps> = ({
             ))}
             
             {formData.items.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                <List className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <List className="w-12 h-12 mx-auto mb-3 text-gray-400 dark:text-gray-500" />
                 <p>Aucun point ajouté à l'ordre du jour</p>
               </div>
             )}
@@ -328,17 +328,18 @@ const OrdreDuJourModal: React.FC<OrdreDuJourModalProps> = ({
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+        <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
           <Button
             type="button"
             variant="outline"
             onClick={onClose}
+            className="dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-white"
           >
             {isReadOnly ? 'Fermer' : 'Annuler'}
           </Button>
           
           {!isReadOnly && (
-            <Button type="submit" className="flex items-center space-x-2">
+            <Button type="submit" className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-700 dark:hover:bg-blue-800">
               {mode === 'create' ? (
                 <>
                   <Plus className="w-4 h-4" />

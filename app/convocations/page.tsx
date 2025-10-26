@@ -175,10 +175,10 @@ export default function ConvocationsPage() {
   if (isLoading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-[400px] bg-gray-50 dark:bg-gray-900">
           <div className="text-center">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary-600" />
-            <p className="text-gray-600">Chargement des convocations...</p>
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600 dark:text-blue-400" />
+            <p className="text-gray-600 dark:text-gray-300">Chargement des convocations...</p>
           </div>
         </div>
       </Layout>
@@ -188,14 +188,16 @@ export default function ConvocationsPage() {
   if (error) {
     return (
       <Layout>
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-[400px] bg-gray-50 dark:bg-gray-900">
           <div className="text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               Erreur de chargement
             </h3>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()}>Réessayer</Button>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()} className="dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-white">
+              Réessayer
+            </Button>
           </div>
         </div>
       </Layout>
@@ -204,16 +206,16 @@ export default function ConvocationsPage() {
 
   return (
     <Layout /* unreadNotificationCount={unreadNotificationCount} */>
-      <div className="space-y-6">
+      <div className="space-y-6 p-6 bg-gray-50 dark:bg-gray-800 min-h-[calc(100vh-64px)] rounded-lg shadow-inner">
         {/* En-tête */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Convocations</h1>
-            <p className="text-gray-600">Gestion des convocations aux sessions</p>
+            <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-2">Convocations</h1>
+            <p className="text-lg text-gray-700 dark:text-gray-300">Gestion des convocations aux sessions</p>
           </div>
           {user?.profil_utilisateur === 'admin' && (
             <Link href="/convocations/nouvelle">
-              <Button>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-700 dark:hover:bg-blue-800">
                 <Plus className="w-4 h-4 mr-2" />
                 Nouvelle convocation
               </Button>
@@ -223,15 +225,15 @@ export default function ConvocationsPage() {
 
         {/* Barre de recherche (visible seulement pour l'admin) */}
         {user?.profil_utilisateur === 'admin' && (
-          <Card>
+          <Card className="dark:bg-gray-700 dark:border-gray-600">
             <CardContent className="p-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
                 <Input
                   placeholder="Rechercher par membre, email ou lieu..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 bg-gray-100 border-gray-200 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
                 />
               </div>
             </CardContent>
@@ -243,7 +245,7 @@ export default function ConvocationsPage() {
           {filteredConvocations.map((convocation) => (
             <Card
               key={convocation.id_convocation}
-              className="hover:shadow-md transition-shadow"
+              className="hover:shadow-md transform transition-transform hover:scale-105 duration-200 dark:bg-gray-700 dark:border-gray-600"
             >
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -252,32 +254,32 @@ export default function ConvocationsPage() {
                     <div className="flex-1">
                       <div className="flex items-center space-x-4">
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                             {user?.profil_utilisateur === 'admin'
                               ? `${convocation.membre?.prenom} ${convocation.membre?.nom}`
                               : `Convocation à la session du ${new Date(convocation.session?.date_session || '').toLocaleDateString('fr-FR')}`}
                           </h3>
-                          <div className="flex items-center space-x-6 mt-2 text-sm text-gray-600">
+                          <div className="flex items-center space-x-6 mt-2 text-sm text-gray-600 dark:text-gray-300">
                             {user?.profil_utilisateur === 'admin' && (
                               <div className="flex items-center space-x-1">
-                                <Mail className="w-4 h-4" />
+                                <Mail className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                                 <span>{convocation.membre?.email}</span>
                               </div>
                             )}
                             {user?.profil_utilisateur === 'admin' && (
                               <div className="flex items-center space-x-1">
-                                <User className="w-4 h-4" />
+                                <User className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                                 <span>{convocation.membre?.fonction}</span>
                               </div>
                             )}
                             <div className="flex items-center space-x-1">
-                              <Calendar className="w-4 h-4" />
+                              <Calendar className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                               <span>
                                 Session du {new Date(convocation.session?.date_session || '').toLocaleDateString('fr-FR')}
                               </span>
                             </div>
                             <div className="flex items-center space-x-1">
-                              <MapPin className="w-4 h-4" />
+                              <MapPin className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                               <span>{convocation.session?.lieu}</span>
                             </div>
                           </div>
@@ -290,7 +292,7 @@ export default function ConvocationsPage() {
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
                         convocation.statut
-                      )}`}
+                      )} dark:bg-opacity-20`}
                     >
                       {convocation.statut}
                     </span>
@@ -301,6 +303,7 @@ export default function ConvocationsPage() {
                         setCurrentConvocation(convocation)
                         setIsConvocationModalOpen(true)
                       }}
+                      className="dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-white"
                     >
                       Voir détails
                     </Button>
@@ -310,11 +313,12 @@ export default function ConvocationsPage() {
                         size="sm"
                         onClick={() => handleSendEmail(convocation.id_convocation)}
                         disabled={sendingEmails.has(convocation.id_convocation)}
+                        className="dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-white"
                       >
                         {sendingEmails.has(convocation.id_convocation) ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
                         ) : (
-                          <Send className="w-4 h-4" />
+                          <Send className="w-4 h-4 mr-2" />
                         )}
                         {sendingEmails.has(convocation.id_convocation) ? 'Envoi...' : 'Renvoyer'}
                       </Button>
@@ -327,20 +331,20 @@ export default function ConvocationsPage() {
         </div>
 
         {filteredConvocations.length === 0 && (
-          <Card>
+          <Card className="dark:bg-gray-700 dark:border-gray-600">
             <CardContent className="p-8 text-center">
-              <Mail className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <Mail className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                 Aucune convocation trouvée
               </h3>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
                 {searchTerm
                   ? "Aucune convocation ne correspond à votre recherche."
                   : "Aucune convocation n'a été créée pour le moment."}
               </p>
               {user?.profil_utilisateur === 'admin' && (
                 <Link href="/convocations/nouvelle">
-                  <Button>
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-700 dark:hover:bg-blue-800">
                     <Plus className="w-4 h-4 mr-2" />
                     Créer la première convocation
                   </Button>

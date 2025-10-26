@@ -57,14 +57,14 @@ const Modal: React.FC<ModalProps> = ({
       
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className={`relative w-full ${sizeClasses[size]} bg-white rounded-lg shadow-xl transform transition-all`}>
+        <div className={`relative w-full ${sizeClasses[size]} bg-white dark:bg-gray-800 rounded-lg shadow-xl transform transition-all`}>
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h2>
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-500 dark:hover:text-gray-300"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -72,7 +72,7 @@ const Modal: React.FC<ModalProps> = ({
           </div>
           
           {/* Content */}
-          <div className="p-6">
+          <div className="p-6 text-gray-900 dark:text-gray-200">
             {children}
           </div>
         </div>

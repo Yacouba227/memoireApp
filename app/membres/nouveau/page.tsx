@@ -41,30 +41,30 @@ export default function NouveauMembrePage() {
   return (
     <ProtectedRoute requireAdmin>
     <Layout>
-      <div className="space-y-6">
+      <div className="space-y-6 p-6 bg-gray-50 dark:bg-gray-800 min-h-[calc(100vh-64px)] rounded-lg shadow-inner">
         {/* Header */}
         <div className="flex items-center space-x-4">
           <Link href="/membres">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Retour
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Nouveau membre</h1>
-            <p className="text-gray-600">Ajouter un nouveau membre au conseil</p>
+            <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-2">Nouveau membre</h1>
+            <p className="text-lg text-gray-700 dark:text-gray-300">Ajouter un nouveau membre au conseil</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Informations personnelles */}
-          <Card>
+          <Card className="dark:bg-gray-700 dark:border-gray-600">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <User className="w-5 h-5" />
+              <CardTitle className="flex items-center space-x-2 text-2xl font-bold text-gray-900 dark:text-white">
+                <User className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                 <span>Informations personnelles</span>
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-gray-700 dark:text-gray-300">
                 Renseignez les informations de base du membre
               </CardDescription>
             </CardHeader>
@@ -76,6 +76,7 @@ export default function NouveauMembrePage() {
                   value={formData.nom}
                   onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
                   required
+                  className="bg-gray-100 border-gray-200 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
                 />
                 <Input
                   label="Prénom"
@@ -83,6 +84,7 @@ export default function NouveauMembrePage() {
                   value={formData.prenom}
                   onChange={(e) => setFormData({ ...formData, prenom: e.target.value })}
                   required
+                  className="bg-gray-100 border-gray-200 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
                 />
               </div>
               <Input
@@ -92,18 +94,19 @@ export default function NouveauMembrePage() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
+                className="bg-gray-100 border-gray-200 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
               />
             </CardContent>
           </Card>
 
           {/* Fonction et profil */}
-          <Card>
+          <Card className="dark:bg-gray-700 dark:border-gray-600">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Briefcase className="w-5 h-5" />
+              <CardTitle className="flex items-center space-x-2 text-2xl font-bold text-gray-900 dark:text-white">
+                <Briefcase className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                 <span>Fonction et profil</span>
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-gray-700 dark:text-gray-300">
                 Définissez la fonction et le profil utilisateur
               </CardDescription>
             </CardHeader>
@@ -114,47 +117,48 @@ export default function NouveauMembrePage() {
                 value={formData.fonction}
                 onChange={(e) => setFormData({ ...formData, fonction: e.target.value })}
                 required
+                className="bg-gray-100 border-gray-200 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
               />
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Profil utilisateur
                 </label>
                 <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 dark:bg-gray-900 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400"
                   value={formData.profil_utilisateur}
                   onChange={(e) => setFormData({ ...formData, profil_utilisateur: e.target.value })}
                 >
-                  <option value="membre">Membre</option>
-                  <option value="admin">Administrateur</option>
+                  <option value="membre" className="dark:bg-gray-900">Membre</option>
+                  <option value="admin" className="dark:bg-gray-900">Administrateur</option>
                 </select>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Rôle académique
                 </label>
                 <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  value={formData.role_membre}
-                  onChange={(e) => setFormData({ ...formData, role_membre: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 dark:bg-gray-900 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400"
+                  value={(formData as any).role_membre}
+                  onChange={(e) => setFormData({ ...formData, role_membre: e.target.value as any })}
                 >
-                  <option value="professeur">Professeur</option>
-                  <option value="docteur">Docteur</option>
-                  <option value="doyen">Doyen</option>
-                  <option value="recteur">Recteur</option>
+                  <option value="professeur" className="dark:bg-gray-900">Professeur</option>
+                  <option value="docteur" className="dark:bg-gray-900">Docteur</option>
+                  <option value="doyen" className="dark:bg-gray-900">Doyen</option>
+                  <option value="recteur" className="dark:bg-gray-900">Recteur</option>
                 </select>
               </div>
             </CardContent>
           </Card>
 
           {/* Sécurité */}
-          <Card>
+          <Card className="dark:bg-gray-700 dark:border-gray-600">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Mail className="w-5 h-5" />
+              <CardTitle className="flex items-center space-x-2 text-2xl font-bold text-gray-900 dark:text-white">
+                <Mail className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                 <span>Accès et sécurité</span>
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-gray-700 dark:text-gray-300">
                 Définissez le mot de passe pour l'accès à la plateforme
               </CardDescription>
             </CardHeader>
@@ -166,9 +170,10 @@ export default function NouveauMembrePage() {
                 value={formData.mot_de_passe}
                 onChange={(e) => setFormData({ ...formData, mot_de_passe: e.target.value })}
                 required
+                className="bg-gray-100 border-gray-200 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
               />
-              <div className="bg-blue-50 p-4 rounded-md">
-                <p className="text-sm text-blue-800">
+              <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-md">
+                <p className="text-sm text-blue-800 dark:text-blue-200">
                   <strong>Note :</strong> Le mot de passe doit contenir au moins 8 caractères. 
                   Il est recommandé d'utiliser une combinaison de lettres, chiffres et caractères spéciaux.
                 </p>
@@ -177,13 +182,13 @@ export default function NouveauMembrePage() {
           </Card>
 
           {/* Actions */}
-          <div className="flex justify-end space-x-4">
+          <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200 dark:border-gray-700">
             <Link href="/membres">
-              <Button variant="outline" type="button">
+              <Button variant="outline" type="button" className="dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-white">
                 Annuler
               </Button>
             </Link>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-700 dark:hover:bg-blue-800">
               <Save className="w-4 h-4 mr-2" />
               {isLoading ? 'Création...' : 'Créer le membre'}
             </Button>

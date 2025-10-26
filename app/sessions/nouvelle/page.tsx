@@ -76,65 +76,65 @@ export default function NouvelleSessionPage() {
   return (
     <ProtectedRoute requireAdmin>
       <Layout>
-      <div className="space-y-6">
+      <div className="space-y-6 p-6 bg-gray-50 dark:bg-gray-800 min-h-[calc(100vh-64px)] rounded-lg shadow-inner">
         {/* En-tête */}
         <div className="flex items-center space-x-4">
           <Link href="/sessions">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Retour
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Nouvelle session</h1>
-            <p className="text-gray-600">Créer une nouvelle session du conseil</p>
+            <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-2">Nouvelle session</h1>
+            <p className="text-lg text-gray-700 dark:text-gray-300">Créer une nouvelle session du conseil</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Informations de base */}
-          <Card>
+          <Card className="dark:bg-gray-700 dark:border-gray-600">
             <CardHeader>
-              <CardTitle>Informations de la session</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Informations de la session</CardTitle>
+              <CardDescription className="text-gray-700 dark:text-gray-300">
                 Renseignez les informations de base de la session
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
                   <Input
                     label="Date de la session"
                     type="datetime-local"
                     value={formData.date_session}
                     onChange={(e) => setFormData({ ...formData, date_session: e.target.value })}
                     required
-                    className="pl-10"
+                    className="pl-10 bg-gray-100 border-gray-200 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
                   />
                 </div>
                 
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
                   <Input
                     label="Lieu"
                     placeholder="Salle de réunion A"
                     value={formData.lieu}
                     onChange={(e) => setFormData({ ...formData, lieu: e.target.value })}
                     required
-                    className="pl-10"
+                    className="pl-10 bg-gray-100 border-gray-200 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
                   />
                 </div>
                 
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
                   <Input
                     label="Président"
                     placeholder="Dr. Diallo"
                     value={formData.president}
                     onChange={(e) => setFormData({ ...formData, president: e.target.value })}
                     required
-                    className="pl-10"
+                    className="pl-10 bg-gray-100 border-gray-200 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
                   />
                 </div>
               </div>
@@ -142,24 +142,25 @@ export default function NouvelleSessionPage() {
           </Card>
 
           {/* Ordres du jour */}
-          <Card>
+          <Card className="dark:bg-gray-700 dark:border-gray-600">
             <CardHeader>
-              <CardTitle>Ordres du jour</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Ordres du jour</CardTitle>
+              <CardDescription className="text-gray-700 dark:text-gray-300">
                 Ajoutez les points à traiter lors de cette session
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {formData.ordresDuJour.map((ordre, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg p-4">
+                <div key={index} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
                   <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-medium text-gray-900">Point {index + 1}</h4>
+                    <h4 className="font-medium text-gray-900 dark:text-white">Point {index + 1}</h4>
                     {formData.ordresDuJour.length > 1 && (
                       <Button
                         type="button"
                         variant="destructive"
                         size="sm"
                         onClick={() => removeOrdreDuJour(index)}
+                        className="dark:hover:bg-red-900 dark:hover:text-red-300"
                       >
                         Supprimer
                       </Button>
@@ -173,14 +174,15 @@ export default function NouvelleSessionPage() {
                       value={ordre.titre_point}
                       onChange={(e) => updateOrdreDuJour(index, 'titre_point', e.target.value)}
                       required
+                      className="bg-gray-100 border-gray-200 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
                     />
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Description
                       </label>
                       <textarea
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-100 dark:bg-gray-900 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400"
                         rows={3}
                         placeholder="Description détaillée du point à traiter..."
                         value={ordre.description_point}
@@ -196,7 +198,7 @@ export default function NouvelleSessionPage() {
                 type="button"
                 variant="outline"
                 onClick={addOrdreDuJour}
-                className="w-full"
+                className="w-full dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-white"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Ajouter un point
@@ -205,13 +207,13 @@ export default function NouvelleSessionPage() {
           </Card>
 
           {/* Actions */}
-          <div className="flex justify-end space-x-4">
+          <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200 dark:border-gray-700">
             <Link href="/sessions">
-              <Button variant="outline" type="button">
+              <Button variant="outline" type="button" className="dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-white">
                 Annuler
               </Button>
             </Link>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-700 dark:hover:bg-blue-800">
               {isLoading ? 'Création...' : 'Créer la session'}
             </Button>
           </div>

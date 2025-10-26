@@ -57,10 +57,10 @@ export default function SessionDetailPage() {
   if (isLoading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-[400px] bg-gray-50 dark:bg-gray-900">
           <div className="text-center">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary-600" />
-            <p className="text-gray-600">Chargement de la session...</p>
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600 dark:text-blue-400" />
+            <p className="text-gray-600 dark:text-gray-300">Chargement de la session...</p>
           </div>
         </div>
       </Layout>
@@ -70,12 +70,14 @@ export default function SessionDetailPage() {
   if (error || !session) {
     return (
       <Layout>
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-[400px] bg-gray-50 dark:bg-gray-900">
           <div className="text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Erreur de chargement</h3>
-            <p className="text-gray-600 mb-4">{error || 'Session non trouvée'}</p>
-            <Button onClick={() => router.back()}>Retour</Button>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Erreur de chargement</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">{error || 'Session non trouvée'}</p>
+            <Button onClick={() => router.back()} className="dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-white">
+              Retour
+            </Button>
           </div>
         </div>
       </Layout>
@@ -84,30 +86,32 @@ export default function SessionDetailPage() {
 
   return (
     <Layout>
-      <div className="space-y-6">
-        <div className="flex items-center space-x-4">
-          <Link href="/sessions">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Retour
-            </Button>
-          </Link>
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold text-gray-900">
-              Session du {new Date(session.date_session).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-            </h1>
-            <p className="text-gray-600">Détails de la session</p>
+      <div className="space-y-6 p-6 bg-gray-50 dark:bg-gray-800 min-h-[calc(100vh-64px)] rounded-lg shadow-inner">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+          <div className="flex items-center space-x-4">
+            <Link href="/sessions">
+              <Button variant="ghost" size="sm" className="text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Retour
+              </Button>
+            </Link>
+            <div className="flex-1">
+              <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-2">
+                Session du {new Date(session.date_session).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              </h1>
+              <p className="text-lg text-gray-700 dark:text-gray-300">Détails de la session</p>
+            </div>
           </div>
           {user?.profil_utilisateur === 'admin' && (
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 mt-4 sm:mt-0">
               <Button variant="outline" onClick={() => {
                 setCurrentSessionToEdit(session)
                 setIsEditModalOpen(true)
-              }}>
+              }} className="dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-white">
                 <Edit className="w-4 h-4 mr-2" />
                 Modifier
               </Button>
-              <Button variant="destructive" onClick={handleDelete}>
+              <Button variant="destructive" onClick={handleDelete} className="dark:hover:bg-red-900 dark:hover:text-red-300">
                 <Trash2 className="w-4 h-4 mr-2" />
                 Supprimer
               </Button>
@@ -115,31 +119,31 @@ export default function SessionDetailPage() {
           )}
         </div>
 
-        <Card>
+        <Card className="dark:bg-gray-700 dark:border-gray-600">
           <CardHeader>
-            <CardTitle>Informations</CardTitle>
+            <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Informations</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex items-center space-x-3">
-                <Calendar className="w-5 h-5 text-gray-400" />
+                <Calendar className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                 <div>
-                  <p className="text-sm text-gray-500">Date</p>
-                  <p className="font-medium">{new Date(session.date_session).toLocaleString('fr-FR')}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Date</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{new Date(session.date_session).toLocaleString('fr-FR')}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
-                <MapPin className="w-5 h-5 text-gray-400" />
+                <MapPin className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                 <div>
-                  <p className="text-sm text-gray-500">Lieu</p>
-                  <p className="font-medium">{session.lieu}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Lieu</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{session.lieu}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
-                <User className="w-5 h-5 text-gray-400" />
+                <User className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                 <div>
-                  <p className="text-sm text-gray-500">Président</p>
-                  <p className="font-medium">{session.president}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Président</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{session.president}</p>
                 </div>
               </div>
             </div>
@@ -147,15 +151,15 @@ export default function SessionDetailPage() {
         </Card>
 
         {session.ordresDuJour && session.ordresDuJour.length > 0 && (
-          <Card>
+          <Card className="dark:bg-gray-700 dark:border-gray-600">
             <CardHeader>
-              <CardTitle>Ordres du jour</CardTitle>
+              <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Ordres du jour</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {session.ordresDuJour.map((o: any, i: number) => (
-                <div key={i} className="border border-gray-200 rounded p-3">
-                  <p className="font-medium">{o.titre_point}</p>
-                  <p className="text-sm text-gray-600">{o.description_point}</p>
+                <div key={i} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
+                  <p className="font-medium text-gray-900 dark:text-white">{o.titre_point}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{o.description_point}</p>
                 </div>
               ))}
             </CardContent>

@@ -14,9 +14,12 @@ import {
   ChevronLeft, 
   ChevronRight,
   User,
-  Menu
+  Menu,
+  // Moon, // Removed Moon icon
+  // Sun // Removed Sun icon
 } from 'lucide-react'
 import { useAuth } from 'contexts/AuthContext'
+// import { useTheme } from 'contexts/ThemeContext' // Importation du hook de thème
 import { Button } from 'components/ui/Button'
 import ProfileModal from 'components/profile/ProfileModal'
 import { toast } from 'sonner'
@@ -41,6 +44,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
   const pathname = usePathname()
   const router = useRouter()
   const { user, logout, updateUser } = useAuth()
+  // const { theme, toggleTheme } = useTheme() // Utilisation du hook de thème
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
   const [lastNotificationId, setLastNotificationId] = useState<number | null>(null)
@@ -136,14 +140,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
   }
 
 
-
   return (
     <div className={`bg-white border-r border-gray-200 transition-all duration-300 ease-in-out ${
       isCollapsed ? 'w-16' : 'w-64'
-    } h-screen fixed left-0 top-0 z-50 shadow-lg flex flex-col`}>
+    } h-screen fixed left-0 top-0 z-50 shadow-lg flex flex-col dark:bg-gray-900 dark:border-gray-700`}>
       
       {/* Header avec logo */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
         {!isCollapsed && (
           <Link href="/dashboard" className="flex items-center space-x-3">
             <img 
@@ -151,6 +154,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
               alt="Logo" 
               className="w-12 h-12 object-contain"
             />
+            <span className="text-xl font-bold text-gray-900 dark:text-white">MemoireApp</span>
           </Link>
         )}
         {isCollapsed && (
@@ -158,7 +162,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
             <img 
               src="/images/logo-fast.gif" 
               alt="Logo" 
-              className="w-12 h-12 object-contain"
+              className="w-10 h-10 object-contain"
             />
           </Link>
         )}
@@ -166,7 +170,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
           variant="ghost"
           size="sm"
           onClick={onToggle}
-          className="p-1 h-8 w-8"
+          className="p-1 h-8 w-8 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
         >
           {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </Button>
@@ -182,10 +186,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                isActive
-                  ? 'bg-blue-100 text-blue-700 border-l-4 border-blue-500'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors 
+                ${isActive
+                  ? 'bg-blue-600 text-white shadow-md dark:bg-blue-700'
+                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white'
               }`}
             >
               <Icon className={`w-5 h-5 ${isCollapsed ? 'mx-auto' : ''}`} />
@@ -204,13 +208,25 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
         })}
       </nav>
 
-      {/* Footer avec contrôles et profil */}
-      <div className="p-4 border-t border-gray-200 space-y-4">
-        {/* Profil utilisateur */}
-        {user && (
+      {/* Footer avec contrôles et profil (retiré car déplacé vers Header) */}
+      <div className="p-4 border-t border-gray-200 space-y-4 dark:border-gray-700">
+        {/* Bouton de thème (retiré car déplacé vers Header) */}
+        {/* <Button
+          variant="ghost"
+          size="sm"
+          onClick={toggleTheme}
+          className={`w-full ${isCollapsed ? 'px-2' : 'px-3'} justify-center text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800`}
+          title={theme === 'light' ? 'Passer au mode sombre' : 'Passer au mode clair'}
+        >
+          {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+          {!isCollapsed && <span className="ml-2">{theme === 'light' ? 'Mode sombre' : 'Mode clair'}</span>}
+        </Button> */}
+
+        {/* Profil utilisateur (retiré car déplacé vers Header) */}
+        {/* {user && (
           <div className={`${isCollapsed ? 'text-center' : ''}`}>
             <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
-              <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
+              <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
                 <img
                   src={(user as any).photo_url || '/images/logo-fast.gif'}
                   alt="Avatar"
@@ -219,10 +235,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
               </div>
               {!isCollapsed && (
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">
+                  <p className="text-sm font-semibold text-gray-900 truncate dark:text-white">
                     {user.prenom} {user.nom}
                   </p>
-                  <p className="text-xs text-gray-500 truncate">
+                  <p className="text-xs text-gray-500 truncate dark:text-gray-400">
                     {user.profil_utilisateur === 'admin' ? 'Administrateur' : 'Membre'}
                   </p>
                 </div>
@@ -232,22 +248,23 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleLogout}
-              className={`mt-3 w-full ${isCollapsed ? 'px-2' : 'px-3'} hover:bg-red-50 hover:text-red-600 transition-colors`}
+              onClick={() => setIsProfileOpen(true)}
+              className={`mt-2 w-full ${isCollapsed ? 'px-2' : 'px-3'} justify-center text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800`}
             >
-              <LogOut className="w-4 h-4" />
-              {!isCollapsed && <span className="ml-2">Déconnexion</span>}
+              <User className="w-5 h-5" />
+              {!isCollapsed && <span className="ml-2">Mon profil</span>}
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
-              onClick={() => setIsProfileOpen(true)}
-              className={`mt-2 w-full ${isCollapsed ? 'px-2' : 'px-3'}`}
+              onClick={handleLogout}
+              className={`mt-2 w-full ${isCollapsed ? 'px-2' : 'px-3'} justify-center hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900 dark:hover:text-red-300 transition-colors text-gray-500 dark:text-gray-400`}
             >
-              {!isCollapsed ? 'Mon profil' : 'Profil'}
+              <LogOut className="w-5 h-5" />
+              {!isCollapsed && <span className="ml-2">Déconnexion</span>}
             </Button>
           </div>
-        )}
+        )} */}
 
         {/* Contrôles déplacés dans le Header */}
       </div>
