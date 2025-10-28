@@ -285,14 +285,15 @@ export default function ParametresPage() {
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex space-x-2">
-                          <Button
+                         {/* Suppression de bouton qui permet une creation de nouveau membre depuis la page parametre */}
+                          {/* <Button 
                             variant="ghost"
                             size="sm"
                             onClick={() => handleUserAction('view', userItem)}
                             className="p-1 h-8 w-8 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
                           >
                             <Eye className="w-4 h-4" />
-                          </Button>
+                          </Button> */}
                           {user?.profil_utilisateur === 'admin' && (
                             <>
                               <Button
